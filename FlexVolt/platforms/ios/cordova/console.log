@@ -1,0 +1,8 @@
+2014-08-10 17:19:50.799 FlexVolt[1899:70b] Multi-tasking -> Device: YES, App: YES
+2014-08-10 17:19:50.861 FlexVolt[1899:70b] Unlimited access to network resources
+2014-08-10 17:19:52.298 FlexVolt[1899:70b] [CDVTimer][keyboard] 0.068963ms
+2014-08-10 17:19:52.299 FlexVolt[1899:70b] CDVPlugin class CDVStatusBar (pluginName: statusbar) does not exist.
+2014-08-10 17:19:52.299 FlexVolt[1899:70b] [CDVTimer][statusbar] 0.426948ms
+2014-08-10 17:19:52.300 FlexVolt[1899:70b] [CDVTimer][TotalPluginStartup] 1.446009ms
+2014-08-10 17:19:52.586 FlexVolt[1899:70b] Resetting plugins due to page load.
+2014-08-10 17:19:53.372 FlexVolt[1899:70b] Finished load of: file:///Users/brendan_p_flynn/Library/Application%20Support/iPhone%20Simulator/7.1/Applications/842047E0-DC41-4140-B561-BF40BFD6A8C9/FlexVolt.app/www/index.html#/tab/dash
