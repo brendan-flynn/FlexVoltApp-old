@@ -8,6 +8,11 @@ angular.module('flexvolt.flexvolt', [])
     api = {
       isConnected: false,
       disconnect: undefined,
+      readAll: undefined,
+      turnDataOn: undefined,
+      turnDataOff: undefined,
+      updateSettings: undefined,
+      pollVersion: undefined,
       flexvoltName: '',
       registerNewDataCallback: undefined,
       debugging: {
@@ -28,7 +33,7 @@ angular.module('flexvolt.flexvolt', [])
     api.registerNewDataCallback = function ( cb ) {
       newDataCallback = cb;
       console.log('Registered newDataCallback.');
-    }
+    };
 
     // Connection Code.
     function simpleLog(msg) { console.log(msg); }
@@ -56,7 +61,7 @@ angular.module('flexvolt.flexvolt', [])
       btDeviceList.forEach(function(device) {
           if ( device.name.slice(0,8) === 'FlexVolt' ) {
             console.log('Found a FlexVolt:' + device.name);
-            console.log(device)
+            console.log(device);
             api.flexvoltName = device.name;
             attemptToConnect(device.id);
           }
@@ -93,9 +98,143 @@ angular.module('flexvolt.flexvolt', [])
         console.log('Got back "b", handshake complete.');
         api.isConnected = true;
         console.log('Connected to ' + api.flexvoltName );
+        pollVersion();
       } else {
         connectionErr('Expected to receive "b"; received "' + data + '". Aborting.');
       }
+    }
+    function turnDataOn(){
+        write('G');
+    }
+    function turnDataOff(){
+        write('Q');
+    }
+    function updateSettings(){
+        write('S');
+        collectNBytes(2,function(data){
+            if ( data === 'Ss'){
+                finishUpdate();
+            }
+        });
+    }
+    function finishUpdate(){
+        var currentSignalNumber = 8, 
+                userFreqIndex = 7,
+                userFrequency = 500,
+                userFrequencyCustom = 0,
+                timer0PartialCount = 0,
+                timer0AdjustVal = 2,
+                smoothFilterFlag = false,
+                bitDepth10 = false,
+                prescalerPic = 2,
+                smoothFilterVal = 8,
+                downSampleCount = 1,
+                plugTestDelay
+                ;
+        
+        
+        
+        var REG = new Uint8Array(9);
+        var REGtmp = 0;
+        var tmp = 0;
+        //Register 1
+        if (currentSignalNumber === 8)tmp = 3;
+        if (currentSignalNumber === 4)tmp = 2;
+        if (currentSignalNumber === 2)tmp = 1;
+        if (currentSignalNumber === 1)tmp = 0;
+        REGtmp = tmp << 6;
+        REGtmp += userFreqIndex << 2;
+        tmp = 0;
+        if (smoothFilterFlag) {
+          tmp = 1;
+        }
+        REGtmp += tmp << 1;
+        tmp = 0;
+        if (bitDepth10) {
+          tmp = 1;
+        }
+        REGtmp += tmp;
+        REG[0] = REGtmp;
+        //trySendChar((char)REGtmp);//10100001
+
+        REGtmp = 0;
+        REGtmp += prescalerPic << 5;
+        REGtmp += smoothFilterVal;
+        REG[1] = REGtmp;
+        console.log('REG[1]='+REG[1]);
+        //trySendChar((char)REGtmp);//01000101
+
+        REGtmp = userFrequencyCustom;
+        REG[2] = REGtmp;
+        //trySendChar((char)REGtmp);
+
+        REGtmp = userFrequencyCustom>>8;
+        REG[3] = REGtmp;
+        //trySendChar((char)REGtmp);
+
+        REGtmp = timer0AdjustVal+6;
+        REG[4] = REGtmp;
+        //trySendChar((char)REGtmp);
+
+        REGtmp = timer0PartialCount;
+        REG[5] = REGtmp;
+        //trySendChar((char)REGtmp);
+
+        REGtmp = timer0PartialCount>>8;
+        REG[6] = REGtmp;
+        console.log('REG[6]='+REG[6]);
+        //trySendChar((char)REGtmp);
+
+        REGtmp = downSampleCount;
+        REG[7] = REGtmp;
+        //trySendChar((char)REGtmp);
+
+        REGtmp = plugTestDelay;
+        REG[8] = REGtmp;
+        //trySendChar((char)REGtmp);
+        
+        console.log('REG.length='+REG.length);
+        var msg = '';
+        for (var i = 0; i < REG.length; i++){
+            msg += REG[i]+', ';
+        }
+        console.log('REG='+msg+', bytes/ ='+REG.BYTES_PER_ELEMENT);
+
+        write(REG);
+        collectNBytes(9,handshake3);
+        write('Y');
+    }
+    function pollVersion(){
+        write('V');
+        collectNBytes(5,parseVersion);
+    }
+    function parseVersion(data){
+        data = new Uint8Array(data);
+        var flexvoltVersion = Number(data[1]);
+        var flexvoltSerialNumber = Number((data[2]*(2^8))+data[3]);
+        var flexvoltModelNumber = Number(data[4]);
+        console.log("Version = "+flexvoltVersion+". SerailNumber = "+flexvoltSerialNumber+". MODEL = "+flexvoltModelNumber);
+    }
+    function collectAllBytes(cb) {
+      var poll;
+      function pollFunc () {
+        bluetoothSerial.available(
+          function ( nBytesAvailable ) {
+            $interval.cancel(poll);
+            console.log(nBytesAvailable+' bytes available');
+            api.debugging.communicationsLog += 'in <-- ' + nBytesAvailable + '\n';
+            bluetoothSerial.read(readSuccess, simpleLog);
+          },
+          simpleLog
+        );
+      }
+      function readSuccess ( data ) {
+        console.log('Received ' + data + ', with length ' + data.length);
+        //console.log('Invoking callback with data ' + data);
+        //cb(data);
+      }
+      poll = $interval(pollFunc, 50, 20);
+      pollFunc();
     }
     function collectNBytes(nBytes, cb) {
       var poll;
@@ -130,5 +269,10 @@ angular.module('flexvolt.flexvolt', [])
     $timeout(discoverFlexvolts, DISCOVER_DELAY_MS);
     api.discoverFlexVolts = discoverFlexvolts;
     api.disconnect = connectionErr;
+    api.readAll = collectAllBytes;
+    api.turnDataOn = turnDataOn;
+    api.turnDataOff = turnDataOff;
+    api.updateSettings = updateSettings;
+    api.pollVersion = pollVersion;
     return api;
   });

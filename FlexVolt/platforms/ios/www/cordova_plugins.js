@@ -27,6 +27,13 @@ module.exports = [
         "clobbers": [
             "device"
         ]
+    },
+    {
+        "file": "plugins/com.megster.cordova.bluetoothserial/www/bluetoothSerial.js",
+        "id": "com.megster.cordova.bluetoothserial.bluetoothSerial",
+        "clobbers": [
+            "window.bluetoothSerial"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -34,7 +41,8 @@ module.exports.metadata =
 {
     "com.ionic.keyboard": "1.0.2",
     "org.apache.cordova.console": "0.2.9",
-    "org.apache.cordova.device": "0.2.10"
+    "org.apache.cordova.device": "0.2.10",
+    "com.megster.cordova.bluetoothserial": "0.3.4"
 }
 // BOTTOM OF METADATA
 });

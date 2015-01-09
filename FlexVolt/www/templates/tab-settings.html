@@ -1,0 +1,15 @@
+<ion-view title="Settings">
+  <ion-content class="has-header padding">
+    <h1>Account</h1>
+      <span ng-bind="flexvolt|json"></span>
+      <p>IsConnected: <span ng-bind="flexvolt.isConnected|json"></span></p>
+      <p>Communications Log:<br>
+      <pre ng-bind="flexvolt.debugging.communicationsLog"></pre></p>
+    <button ng-click="getData()">get data!</button>
+    <button ng-click="poll()">poll v</button>
+    <button ng-click="flexvolt.updateSettings()">update</button>
+    <button ng-click="flexvolt.turnDataOn()">D ON</button>
+    <button ng-click="flexvolt.turnDataOff()">D OFF</button>
+    <div id="plotWindow"></div>
+  </ion-content>
+</ion-view>
