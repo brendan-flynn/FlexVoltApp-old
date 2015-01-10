@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
-import java.util.Arrays;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -335,7 +334,7 @@ public class BluetoothSerialService {
      * succeeds or fails.
      */
     private class ConnectThread extends Thread {
-        private /*final*/ BluetoothSocket mmSocket;
+        private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
         private String mSocketType;
 
@@ -369,29 +368,18 @@ public class BluetoothSerialService {
             // Make a connection to the BluetoothSocket
             try {
                 // This is a blocking call and will only return on a successful connection or an exception
-                Log.i(TAG,"Connecting to socket...");
                 mmSocket.connect();
-                Log.i(TAG,"Connected");
             } catch (IOException e) {
                 Log.e(TAG, e.toString());
-
-                // Some 4.1 devices have problems, try an alternative way to connect
-                // See https://github.com/don/BluetoothSerial/issues/89
+                e.printStackTrace();
+                // Close the socket
                 try {
-                    Log.i(TAG,"Trying fallback...");
-                    mmSocket = (BluetoothSocket) mmDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(mmDevice,1);
-                    mmSocket.connect();
-                    Log.i(TAG,"Connected");
-                } catch (Exception e2) {
-                    Log.e(TAG, "Couldn't establish a Bluetooth connection.");
-                    try {
-                        mmSocket.close();
-                    } catch (IOException e3) {
-                        Log.e(TAG, "unable to close() " + mSocketType + " socket during connection failure", e3);
-                    }
-                    connectionFailed();
-                    return;
+                    mmSocket.close();
+                } catch (IOException e2) {
+                    Log.e(TAG, "unable to close() " + mSocketType + " socket during connection failure", e2);
                 }
+                connectionFailed();
+                return;
             }
 
             // Reset the ConnectThread because we're done
@@ -442,25 +430,22 @@ public class BluetoothSerialService {
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
             byte[] buffer = new byte[1024];
-            int bytes;
+            int bytesRead;
 
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
                     // Read from the InputStream
-                    bytes = mmInStream.read(buffer);
-                    String data = new String(buffer, 0, bytes);
+                    bytesRead = mmInStream.read(buffer);
+                    // String data = new String(buffer, 0, bytesRead);
+
+                    byte[] messageBytes = new byte[bytesRead];
+                    for (int i = 0; i < bytesRead; i++) {
+                        messageBytes[i] = buffer[i];
+                    }
 
                     // Send the new data String to the UI Activity
-                    mHandler.obtainMessage(BluetoothSerial.MESSAGE_READ, data).sendToTarget();
-
-                    // Send the raw bytestream to the UI Activity.
-                    // We make a copy because the full array can have extra data at the end
-                    // when / if we read less than its size.
-                    if (bytes > 0) {
-                        byte[] rawdata = Arrays.copyOf(buffer, bytes);
-                        mHandler.obtainMessage(BluetoothSerial.MESSAGE_READ_RAW, rawdata).sendToTarget();
-                    }
+                    mHandler.obtainMessage(BluetoothSerial.MESSAGE_READ, messageBytes).sendToTarget();
 
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);

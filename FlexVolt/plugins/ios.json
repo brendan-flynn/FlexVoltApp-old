@@ -43,16 +43,16 @@
     },
     "installed_plugins": {
         "com.ionic.keyboard": {
-            "PACKAGE_NAME": "com.ionicframework.flexvolt687761"
-        },
-        "org.apache.cordova.console": {
-            "PACKAGE_NAME": "com.ionicframework.flexvolt687761"
-        },
-        "org.apache.cordova.device": {
-            "PACKAGE_NAME": "com.ionicframework.flexvolt687761"
+            "PACKAGE_NAME": "org.flexvolt"
         },
         "com.megster.cordova.bluetoothserial": {
-            "PACKAGE_NAME": "com.ionicframework.flexvolt687761"
+            "PACKAGE_NAME": "org.flexvolt"
+        },
+        "org.apache.cordova.console": {
+            "PACKAGE_NAME": "org.flexvolt"
+        },
+        "org.apache.cordova.device": {
+            "PACKAGE_NAME": "org.flexvolt"
         }
     },
     "dependent_plugins": {}

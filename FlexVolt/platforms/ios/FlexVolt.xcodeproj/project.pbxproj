@@ -38,14 +38,14 @@
 		7E7966E61810823500FA85AD /* icon-small.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DC1810823500FA85AD /* icon-small.png */; };
 		7E7966E71810823500FA85AD /* icon-small@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E7966DD1810823500FA85AD /* icon-small@2x.png */; };
 		D4A0D8761607E02300AEF8BB /* Default-568h@2x~iphone.png in Resources */ = {isa = PBXBuildFile; fileRef = D4A0D8751607E02300AEF8BB /* Default-568h@2x~iphone.png */; };
-		429B637E4B524BBAB87C73D4 /* IonicKeyboard.m in Sources */ = {isa = PBXBuildFile; fileRef = C7C83E09E9AD43A8ADB56A25 /* IonicKeyboard.m */; };
-		4C6A63E1A84C45E38CD4DA59 /* UIWebViewExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 7DF6BE092CD54B7E8F116A0A /* UIWebViewExtension.m */; };
-		3D0C1D5790AF4ABC93002453 /* CDVLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 46C3997292934EB7B21E476B /* CDVLogger.m */; };
-		E767B445BBDC4368A3BCE0A6 /* CDVDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = A2490511128B4C1D9F459F7E /* CDVDevice.m */; };
-		8104DD92CCBD4972963A1275 /* MEGBluetoothSerial.m in Sources */ = {isa = PBXBuildFile; fileRef = 770D3EF15B9645D588072FFC /* MEGBluetoothSerial.m */; };
-		554E96F85BA4438F8BE0F55B /* CBPeripheral+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 5338DBEF019B4CA0B40C6379 /* CBPeripheral+Extensions.m */; };
-		F4CD487A213A4ADA8D2B3B35 /* BLE.m in Sources */ = {isa = PBXBuildFile; fileRef = 901943AE28A94A1EBCE64C45 /* BLE.m */; };
-		6DE9A6E57B314F3293AE93EE /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ABB2116D1B054E8F9F93B21C /* CoreBluetooth.framework */; };
+		5DF9FE73FC49485CAA7F5877 /* IonicKeyboard.m in Sources */ = {isa = PBXBuildFile; fileRef = 222A15FC9DCC4529A23FFD00 /* IonicKeyboard.m */; };
+		0ADD854B8EAB46DA93B882EA /* UIWebViewExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 478E4A4944CA48D7B6DFC5E8 /* UIWebViewExtension.m */; };
+		45E669389C3F4B628F46466B /* MEGBluetoothSerial.m in Sources */ = {isa = PBXBuildFile; fileRef = 965AC3C4C3234A46A9AE1F50 /* MEGBluetoothSerial.m */; };
+		A22DFEC831EC4023ABD7A2C7 /* CBPeripheral+Extensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F601D638C5B4367A3371A55 /* CBPeripheral+Extensions.m */; };
+		6807971E312344AB8D1E7A49 /* BLE.m in Sources */ = {isa = PBXBuildFile; fileRef = 25894CA3E4DA47DBB56219E9 /* BLE.m */; };
+		F58E33DCD5EE4B38B77901AA /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BF4198FCFA54A7A80791F94 /* CoreBluetooth.framework */; };
+		75DEE59846E44146A27CB5A1 /* CDVLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = E6CA96700F6744308CD50B78 /* CDVLogger.m */; };
+		10D45A446D10493FA58E7474 /* CDVDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = DD5398E602564623AF9380AE /* CDVDevice.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,22 +110,22 @@
 		EB87FDF31871DA8E0020F90C /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; name = www; path = ../../www; sourceTree = "<group>"; };
 		EB87FDF41871DAF40020F90C /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = ../../config.xml; sourceTree = "<group>"; };
 		F840E1F0165FE0F500CFE078 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = config.xml; path = "FlexVolt/config.xml"; sourceTree = "<group>"; };
-		C7C83E09E9AD43A8ADB56A25 /* IonicKeyboard.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "IonicKeyboard.m"; path = "com.ionic.keyboard/IonicKeyboard.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		7DF6BE092CD54B7E8F116A0A /* UIWebViewExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIWebViewExtension.m"; path = "com.ionic.keyboard/UIWebViewExtension.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		E37D2D675E954AECBD8B325B /* IonicKeyboard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "IonicKeyboard.h"; path = "com.ionic.keyboard/IonicKeyboard.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		396A3B6E14E349B690E19DB4 /* UIWebViewExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIWebViewExtension.h"; path = "com.ionic.keyboard/UIWebViewExtension.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		46C3997292934EB7B21E476B /* CDVLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVLogger.m"; path = "org.apache.cordova.console/CDVLogger.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		394E2C9844644208AF73E254 /* CDVLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVLogger.h"; path = "org.apache.cordova.console/CDVLogger.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		A2490511128B4C1D9F459F7E /* CDVDevice.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVDevice.m"; path = "org.apache.cordova.device/CDVDevice.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		E7B83D18E0B44A9985C0FC29 /* CDVDevice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVDevice.h"; path = "org.apache.cordova.device/CDVDevice.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		770D3EF15B9645D588072FFC /* MEGBluetoothSerial.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "MEGBluetoothSerial.m"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/MEGBluetoothSerial.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		5338DBEF019B4CA0B40C6379 /* CBPeripheral+Extensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CBPeripheral+Extensions.m"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/CBPeripheral+Extensions.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		901943AE28A94A1EBCE64C45 /* BLE.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "BLE.m"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/BLE.m"; sourceTree = "<group>"; fileEncoding = 4; };
-		D58842F3932745EB8D552766 /* MEGBluetoothSerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "MEGBluetoothSerial.h"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/MEGBluetoothSerial.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		02CEC2469A9D434F972B1601 /* CBPeripheral+Extensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CBPeripheral+Extensions.h"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/CBPeripheral+Extensions.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		4A830D7563624766BAE0BD9B /* BLE.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BLE.h"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/BLE.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		B6DBFD6E1355415F85259D87 /* BLEDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BLEDefines.h"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/BLEDefines.h"; sourceTree = "<group>"; fileEncoding = 4; };
-		ABB2116D1B054E8F9F93B21C /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "CoreBluetooth.framework"; path = "System/Library/Frameworks/CoreBluetooth.framework"; sourceTree = SDKROOT; fileEncoding = 4; };
+		222A15FC9DCC4529A23FFD00 /* IonicKeyboard.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "IonicKeyboard.m"; path = "com.ionic.keyboard/IonicKeyboard.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		478E4A4944CA48D7B6DFC5E8 /* UIWebViewExtension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIWebViewExtension.m"; path = "com.ionic.keyboard/UIWebViewExtension.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		757A3EDA1C9C4EFCA9CE7949 /* IonicKeyboard.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "IonicKeyboard.h"; path = "com.ionic.keyboard/IonicKeyboard.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		E1207F7B7E324B7D8F672C95 /* UIWebViewExtension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIWebViewExtension.h"; path = "com.ionic.keyboard/UIWebViewExtension.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		965AC3C4C3234A46A9AE1F50 /* MEGBluetoothSerial.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "MEGBluetoothSerial.m"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/MEGBluetoothSerial.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		7F601D638C5B4367A3371A55 /* CBPeripheral+Extensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CBPeripheral+Extensions.m"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/CBPeripheral+Extensions.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		25894CA3E4DA47DBB56219E9 /* BLE.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "BLE.m"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/BLE.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		C009B55558D54D5383AFDCF4 /* MEGBluetoothSerial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "MEGBluetoothSerial.h"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/MEGBluetoothSerial.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		79B938D87314434AB24B0AA8 /* CBPeripheral+Extensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CBPeripheral+Extensions.h"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/CBPeripheral+Extensions.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		0B549654B74341B59BEE6206 /* BLE.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BLE.h"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/BLE.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		16923BB13E604821B169B201 /* BLEDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "BLEDefines.h"; path = "com.megster.cordova.bluetoothserial/BluetoothSerial/BLEDefines.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		7BF4198FCFA54A7A80791F94 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "CoreBluetooth.framework"; path = "System/Library/Frameworks/CoreBluetooth.framework"; sourceTree = SDKROOT; fileEncoding = 4; };
+		E6CA96700F6744308CD50B78 /* CDVLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVLogger.m"; path = "org.apache.cordova.console/CDVLogger.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		8BE293BD2DDF482587402E85 /* CDVLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVLogger.h"; path = "org.apache.cordova.console/CDVLogger.h"; sourceTree = "<group>"; fileEncoding = 4; };
+		DD5398E602564623AF9380AE /* CDVDevice.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "CDVDevice.m"; path = "org.apache.cordova.device/CDVDevice.m"; sourceTree = "<group>"; fileEncoding = 4; };
+		2C1EE4F3A7E94D4F8BAC686E /* CDVDevice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CDVDevice.h"; path = "org.apache.cordova.device/CDVDevice.h"; sourceTree = "<group>"; fileEncoding = 4; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,7 +138,7 @@
 				288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */,
 				305D5FD1115AB8F900A74A75 /* MobileCoreServices.framework in Frameworks */,
 				5AEE5B35173C68D80009041E /* CoreLocation.framework in Frameworks */,
-				6DE9A6E57B314F3293AE93EE /* CoreBluetooth.framework in Frameworks */,
+				F58E33DCD5EE4B38B77901AA /* CoreBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,7 +232,7 @@
 				5B1594DC16A7569C00FEF299 /* AssetsLibrary.framework */,
 				288765FC0DF74451002DB57D /* CoreGraphics.framework */,
 				305D5FD0115AB8F900A74A75 /* MobileCoreServices.framework */,
-				ABB2116D1B054E8F9F93B21C /* CoreBluetooth.framework */,
+				7BF4198FCFA54A7A80791F94 /* CoreBluetooth.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -248,21 +248,21 @@
 		307C750510C5A3420062BCA9 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
-				C7C83E09E9AD43A8ADB56A25 /* IonicKeyboard.m */,
-				7DF6BE092CD54B7E8F116A0A /* UIWebViewExtension.m */,
-				E37D2D675E954AECBD8B325B /* IonicKeyboard.h */,
-				396A3B6E14E349B690E19DB4 /* UIWebViewExtension.h */,
-				46C3997292934EB7B21E476B /* CDVLogger.m */,
-				394E2C9844644208AF73E254 /* CDVLogger.h */,
-				A2490511128B4C1D9F459F7E /* CDVDevice.m */,
-				E7B83D18E0B44A9985C0FC29 /* CDVDevice.h */,
-				770D3EF15B9645D588072FFC /* MEGBluetoothSerial.m */,
-				5338DBEF019B4CA0B40C6379 /* CBPeripheral+Extensions.m */,
-				901943AE28A94A1EBCE64C45 /* BLE.m */,
-				D58842F3932745EB8D552766 /* MEGBluetoothSerial.h */,
-				02CEC2469A9D434F972B1601 /* CBPeripheral+Extensions.h */,
-				4A830D7563624766BAE0BD9B /* BLE.h */,
-				B6DBFD6E1355415F85259D87 /* BLEDefines.h */,
+				222A15FC9DCC4529A23FFD00 /* IonicKeyboard.m */,
+				478E4A4944CA48D7B6DFC5E8 /* UIWebViewExtension.m */,
+				757A3EDA1C9C4EFCA9CE7949 /* IonicKeyboard.h */,
+				E1207F7B7E324B7D8F672C95 /* UIWebViewExtension.h */,
+				965AC3C4C3234A46A9AE1F50 /* MEGBluetoothSerial.m */,
+				7F601D638C5B4367A3371A55 /* CBPeripheral+Extensions.m */,
+				25894CA3E4DA47DBB56219E9 /* BLE.m */,
+				C009B55558D54D5383AFDCF4 /* MEGBluetoothSerial.h */,
+				79B938D87314434AB24B0AA8 /* CBPeripheral+Extensions.h */,
+				0B549654B74341B59BEE6206 /* BLE.h */,
+				16923BB13E604821B169B201 /* BLEDefines.h */,
+				E6CA96700F6744308CD50B78 /* CDVLogger.m */,
+				8BE293BD2DDF482587402E85 /* CDVLogger.h */,
+				DD5398E602564623AF9380AE /* CDVDevice.m */,
+				2C1EE4F3A7E94D4F8BAC686E /* CDVDevice.h */,
 			);
 			name = Plugins;
 			path = "FlexVolt/Plugins";
@@ -457,13 +457,13 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* AppDelegate.m in Sources */,
 				302D95F114D2391D003F00A1 /* MainViewController.m in Sources */,
-				429B637E4B524BBAB87C73D4 /* IonicKeyboard.m in Sources */,
-				4C6A63E1A84C45E38CD4DA59 /* UIWebViewExtension.m in Sources */,
-				3D0C1D5790AF4ABC93002453 /* CDVLogger.m in Sources */,
-				E767B445BBDC4368A3BCE0A6 /* CDVDevice.m in Sources */,
-				8104DD92CCBD4972963A1275 /* MEGBluetoothSerial.m in Sources */,
-				554E96F85BA4438F8BE0F55B /* CBPeripheral+Extensions.m in Sources */,
-				F4CD487A213A4ADA8D2B3B35 /* BLE.m in Sources */,
+				5DF9FE73FC49485CAA7F5877 /* IonicKeyboard.m in Sources */,
+				0ADD854B8EAB46DA93B882EA /* UIWebViewExtension.m in Sources */,
+				45E669389C3F4B628F46466B /* MEGBluetoothSerial.m in Sources */,
+				A22DFEC831EC4023ABD7A2C7 /* CBPeripheral+Extensions.m in Sources */,
+				6807971E312344AB8D1E7A49 /* BLE.m in Sources */,
+				75DEE59846E44146A27CB5A1 /* CDVLogger.m in Sources */,
+				10D45A446D10493FA58E7474 /* CDVDevice.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

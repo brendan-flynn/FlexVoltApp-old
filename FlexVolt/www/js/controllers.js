@@ -152,11 +152,15 @@ angular.module('flexvolt.controllers', [])
     
     $scope.getData = function(){
         console.log('trying to get data');
-        flexvolt.readAll();
+        flexvolt.readAll(2,function(data){console.log('dummy cb'+data);});
     };
     
     $scope.poll = function(){
         console.log('trying to poll');
         flexvolt.pollVersion();
+    }
+    
+    $scope.clearLog = function(){
+        flexvolt.debugging.communicationsLog = '';
     }
 });
