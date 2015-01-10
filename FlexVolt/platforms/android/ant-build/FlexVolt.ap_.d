@@ -1541,6 +1541,7 @@
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/assets/www/plugins/com.megster.cordova.bluetoothserial/www/bluetoothSerial.js \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/assets/www/plugins/org.apache.cordova.device/www \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/assets/www/plugins/org.apache.cordova.device/www/device.js \
+/Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/assets/www/templates/home.html \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/assets/www/templates/tab-dash.html \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/assets/www/templates/tab-game.html \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/assets/www/templates/tab-plot.html \

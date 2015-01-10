@@ -150,7 +150,7 @@ angular.module('flexvolt.controllers', [])
     $scope.flexvolt = flexvolt;
     window.flexvolt = flexvolt;
     
-    $scope.getData = function(){
+    $scope.readAll = function(){
         console.log('trying to get data');
         flexvolt.readAll(2,function(data){console.log('dummy cb'+data);});
     };

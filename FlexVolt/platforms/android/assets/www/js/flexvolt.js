@@ -14,7 +14,6 @@ angular.module('flexvolt.flexvolt', [])
       updateSettings: undefined,
       pollVersion: undefined,
       sendTest: undefined,
-      readTest: undefined,
       flexvoltName: '',
       registerNewDataCallback: undefined,
       debugging: {
@@ -22,7 +21,7 @@ angular.module('flexvolt.flexvolt', [])
       }
     };
     
-    var bufInd = 0;
+    //var bufInd = 0;
     var buf = new ArrayBuffer(10);
     var view = new Uint8Array(buf);
     view[0] = 0;
@@ -143,7 +142,7 @@ angular.module('flexvolt.flexvolt', [])
         //console.log('clearing to update settings');
         //bluetoothSerial.clear();
         write('S');
-        collectAllBytes(2,function(data){
+        collectAllBytes(6,function(data){
             console.log('updatesettings data returned = ');
             console.log(data);
             for (var i = 0; i < data.length; i++){
@@ -159,8 +158,8 @@ angular.module('flexvolt.flexvolt', [])
         var currentSignalNumber = 8, 
                 userFreqIndex = 6,
                 userFrequency = 500,
-                userFrequencyCustom = 0,
-                timer0PartialCount = 0,
+                userFrequencyCustom = 430,
+                timer0PartialCount = 500,
                 timer0AdjustVal = 2,
                 smoothFilterFlag = false,
                 bitDepth10 = false,
@@ -169,7 +168,6 @@ angular.module('flexvolt.flexvolt', [])
                 downSampleCount = 1,
                 plugTestDelay = 0
                 ;
-        
         
         
         var REG = [];
@@ -202,6 +200,8 @@ angular.module('flexvolt.flexvolt', [])
         //trySendChar((char)REGtmp); // 01001000 72
 
         REGtmp = userFrequencyCustom;
+        REGtmp = (Math.round(REGtmp >> 8)<<8);
+        REGtmp = userFrequencyCustom-REGtmp;
         REG.push(REGtmp);
         //trySendChar((char)REGtmp); // 00000000
 
@@ -214,6 +214,8 @@ angular.module('flexvolt.flexvolt', [])
         //trySendChar((char)REGtmp); // 00001000 8
 
         REGtmp = timer0PartialCount;
+        REGtmp = (Math.round(REGtmp >> 8)<<8);
+        REGtmp = timer0PartialCount-REGtmp;
         REG.push(REGtmp);
         //trySendChar((char)REGtmp); // 00000000
 
@@ -244,7 +246,7 @@ angular.module('flexvolt.flexvolt', [])
         }
         console.log('REG8='+msg+'bytes/ ='+REG8.BYTES_PER_ELEMENT);
         
-        writeBuffer(REG8[0]);
+        writeBuffer(REG8,9);
         //collectAllBytes(30,function(data){});
         //write('Y');
     }
@@ -266,26 +268,33 @@ angular.module('flexvolt.flexvolt', [])
         // This method works for [5, 10] & [50, 100]  & [150, 200], using writeBuffer !!
         // does not work for longer arrays!?  2-3 seems to work, but 5 does not...
 //        var ind = 0;
-//        var buf = new ArrayBuffer(5);
+//        var buf = new ArrayBuffer(2);
 //        var view = new Uint8Array(buf);
 //        view[0] = 0;
 //        view[1] = 200;
 //        view[2] = 17;
 //        view[3] = 0;
 //        view[4] = 255;
-        var tmpBuf = new ArrayBuffer(1);
-        var tmpView = new Uint8Array(tmpBuf);
+//        //write(view); //does NOT work
+//        //write(buf); //does NOT work
+//        writeBuffer(buf);
+        
+        
         
 //        tmpView[0]=view[bufInd];
 //        console.log('buffer is now '+tmpView[0] + ', and index is now '+ bufInd);
 //        writeBuffer(tmpBuf);
 //        bufInd++;
+        var bufInd = 0;
         
         function sendFunc(){
+            var tmpBuf = new ArrayBuffer(1);
+            var tmpView = new Uint8Array(tmpBuf);
             tmpView[0]=view[bufInd];
             console.log('buffer is now '+tmpView[0] + ', and index is now '+ bufInd);
             writeBuffer(tmpBuf);
             bufInd++;
+            bufInd = bufInd%10;
             if (bufInd >= 10){
                 $interval.cancel(sendTimer);
             }
@@ -312,52 +321,52 @@ angular.module('flexvolt.flexvolt', [])
         var flexvoltModelNumber = Number(data2[3]);
         console.log("Version = "+flexvoltVersion+". SerailNumber = "+flexvoltSerialNumber+". MODEL = "+flexvoltModelNumber);
     }
-    function collect(){
-        var poll;
-      function pollFunc () {
-        bluetoothSerial.available(
-          function ( nBytesAvailable ) {
-            if ( nBytesAvailable > 0 ) {
-              $interval.cancel(poll);
-              // DOES NOT WORK FOR BYTES FROM FLEXVOLT...
-              bluetoothSerial.read(readSuccess, simpleLog);
-            }
-          },
-          simpleLog
-        );
-      }
-      function readSuccess ( data ) {
-        // none of these make bluetoothSerial.read work for bytes - they all return gibberish!!!
-        console.log('Received ' + data + ' with length ' + data.length);
-        console.log(data);
-        var utf8 = unescape(encodeURIComponent(data));
-        var arr = [];
-        for (var i=0; i<utf8.length;i++){
-            arr.push(utf8.charCodeAt(i));
-        }
-        
-        var arr3 = [];
-        for (var i=0; i<data.length;i++){
-            arr3.push(data.charCodeAt(i));
-        }
-        
-        var arr2 = new Uint8Array(data.length);
-        for (var i=0; i < data.length; i++) {
-            arr2[i] = data.charCodeAt(i);
-        }
-
-        console.log('Converted ' + arr + ' with length ' + arr.length);
-        var msg = '';
-        for (var i = 0; i < arr2.length; i++){
-            msg+= arr2[i]+',';
-        }
-        console.log('Converted ' + msg + ' with length ' + arr2.length);
-        console.log('Converted ' + arr3 + ' with length ' + arr3.length);
-        
-      }
-      poll = $interval(pollFunc, 50, 20);
-      pollFunc();
-    }
+//    function collect(){
+//        var poll;
+//      function pollFunc () {
+//        bluetoothSerial.available(
+//          function ( nBytesAvailable ) {
+//            if ( nBytesAvailable > 0 ) {
+//              $interval.cancel(poll);
+//              // DOES NOT WORK FOR BYTES FROM FLEXVOLT...
+//              bluetoothSerial.read(readSuccess, simpleLog);
+//            }
+//          },
+//          simpleLog
+//        );
+//      }
+//      function readSuccess ( data ) {
+//        // none of these make bluetoothSerial.read work for bytes - they all return gibberish!!!
+//        console.log('Received ' + data + ' with length ' + data.length);
+//        console.log(data);
+//        var utf8 = unescape(encodeURIComponent(data));
+//        var arr = [];
+//        for (var i=0; i<utf8.length;i++){
+//            arr.push(utf8.charCodeAt(i));
+//        }
+//        
+//        var arr3 = [];
+//        for (var i=0; i<data.length;i++){
+//            arr3.push(data.charCodeAt(i));
+//        }
+//        
+//        var arr2 = new Uint8Array(data.length);
+//        for (var i=0; i < data.length; i++) {
+//            arr2[i] = data.charCodeAt(i);
+//        }
+//
+//        console.log('Converted ' + arr + ' with length ' + arr.length);
+//        var msg = '';
+//        for (var i = 0; i < arr2.length; i++){
+//            msg+= arr2[i]+',';
+//        }
+//        console.log('Converted ' + msg + ' with length ' + arr2.length);
+//        console.log('Converted ' + arr3 + ' with length ' + arr3.length);
+//        
+//      }
+//      poll = $interval(pollFunc, 50, 20);
+//      pollFunc();
+//    }
     function collectAllBytes(nBytes, cb) {
       nBytes = nBytes | 1;
       var poll;
@@ -414,18 +423,37 @@ angular.module('flexvolt.flexvolt', [])
       pollFunc();
     }
     function write( data ) {
-      api.debugging.communicationsLog += 'out -> ' + data + '\n';
-      bluetoothSerial.write(data, simpleLog, simpleLog);
+        api.debugging.communicationsLog += 'out -> ' + data + '\n';
+        bluetoothSerial.write(data, simpleLog, simpleLog);
     }
     function writeBuffer( data ){
-      api.debugging.communicationsLog += 'out -> ' + data + '\n';
-      bluetoothSerial.writeBuffer(data, simpleLog, simpleLog);  
+        // data can be an array or Uint8Array
+        var sendTimer;
+        var bufInd = 0;
+        var nBytes = data.length;
+        console.log('inside writeBuffer with '+nBytes+' to send in '+data);
+
+        function sendFunc(){
+            console.log('bufInd='+bufInd+', nBytes='+nBytes);
+            if (bufInd < nBytes){
+                var tmpBuf = new ArrayBuffer(1);
+                var tmpView = new Uint8Array(tmpBuf);
+                tmpView[0]=data[bufInd];
+                console.log('buffer is now '+tmpView[0] + ', and index is now '+ bufInd);
+                bluetoothSerial.writeBuffer(tmpBuf);
+                bufInd++;
+                if (bufInd >= nBytes){
+                    $interval.cancel(sendTimer);
+                }
+            }
+        } 
+        sendTimer = $interval(sendFunc, 50, nBytes);
+        api.debugging.communicationsLog += 'out -> ' + data + '\n';
     }
     $timeout(discoverFlexvolts, DISCOVER_DELAY_MS);
     api.discoverFlexVolts = discoverFlexvolts;
     api.disconnect = connectionErr;
     api.readAll = collectAllBytes;
-    api.readTest = collect;
     api.turnDataOn = turnDataOn;
     api.turnDataOff = turnDataOff;
     api.updateSettings = updateSettings;

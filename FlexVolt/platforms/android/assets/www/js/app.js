@@ -39,8 +39,20 @@ angular.module('flexvolt', ['ionic', 'flexvolt.controllers', 'flexvolt.services'
 
   });
 })
-
+//.config(function($ionicConfigProvider){
+//    $ionicConfigProvider.views.maxCache(0);
+//})
 .config(function($stateProvider, $urlRouterProvider) {
+    
+    //    .state('home', {
+//      url: '/',
+//      views: {
+//          home: {
+//              template: 'templates/home.html',
+//              controller: homeCtrl
+//          }
+//      }
+//    })
 
   // Ionic uses AngularUI Router which uses the concept of states
   // Learn more here: https://github.com/angular-ui/ui-router
