@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="flexvolt">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
@@ -28,11 +28,9 @@
     <script src="js/services.js"></script>
     <script src="js/flexvolt.js"></script>
   </head>
-  <body ng-app="flexvolt" animation="slide-left-right-ios7">
-    <!-- 
-      The nav bar that will be updated as we navigate between views.
-    -->
-    <ion-nav-bar class="bar-stable nav-title-slide-ios7">
+  <body animation="slide-left-right-ios7">
+
+<!--    <ion-nav-bar class="bar-stable nav-title-slide-ios7">
       <ion-nav-back-button class="button-icon icon  ion-ios7-arrow-back">
         Back
       </ion-nav-back-button>
@@ -42,12 +40,13 @@
         <ion-nav-buttons side="right">
             <button class="button button-icon icon ion-gear-b"></button>
         </ion-nav-buttons>
+    </ion-nav-bar>-->
+
+    <ion-nav-bar class="bar-positive">
+        <ion-nav-back-button class="button-icon ion-arrow-left-c">
+        </ion-nav-back-button>
     </ion-nav-bar>
-    <!-- 
-      The views will be rendered in the <ion-nav-view> directive below
-      Templates are in the /templates folder (but you could also
-      have templates inline in this html file if you'd like).
-    -->
     <ion-nav-view></ion-nav-view>
+    
   </body>
 </html>

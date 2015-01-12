@@ -3,3 +3,17 @@ path.line
 {
     fill: none;
 }
+
+.my-icon-col{
+    text-align:center !important;
+}
+
+.my-icon-row{
+    padding-bottom:30px !important;
+}
+
+.home-page-icons:before,
+.home-page-icons{
+    font-size:60px !important;
+    display:block !important;
+}

@@ -44,73 +44,45 @@ angular.module('flexvolt', ['ionic', 'flexvolt.controllers', 'flexvolt.services'
 //})
 .config(function($stateProvider, $urlRouterProvider) {
     
-    //    .state('home', {
-//      url: '/',
-//      views: {
-//          home: {
-//              template: 'templates/home.html',
-//              controller: homeCtrl
-//          }
-//      }
-//    })
-
-  // Ionic uses AngularUI Router which uses the concept of states
-  // Learn more here: https://github.com/angular-ui/ui-router
-  // Set up the various states which the app can be in.
-  // Each state's controller can be found in controllers.js
   $stateProvider
-
-    // setup an abstract state for the tabs directive
-    .state('tab', {
-      url: "/tab",
-      abstract: true,
-      templateUrl: "templates/tabs.html"
+    .state('home', {
+        url: '/',
+        templateUrl: 'templates/home.html',
+        controller: 'HomeCtrl'
     })
 
     // Each tab has its own nav history stack:
 
-    .state('tab.dash', {
-      url: '/dash',
-      views: {
-        'tab-dash': {
-          templateUrl: 'templates/tab-dash.html',
-          controller: 'DashCtrl'
-        }
-      }
-    })
+//    .state('tab.dash', {
+//      url: '/dash',
+//      views: {
+//        'tab-dash': {
+//          templateUrl: 'templates/tab-dash.html',
+//          controller: 'DashCtrl'
+//        }
+//      }
+//    })
 
-    .state('tab.plot', {
-      url: '/plot',
-      views: {
-        'tab-plot': {
-          templateUrl: 'templates/tab-plot.html',
-          controller: 'PlotCtrl'
-        }
-      }
+    .state('plot', {
+        url: '/plot',
+        templateUrl: 'templates/plot.html',
+        controller: 'PlotCtrl'
     })
     
-    .state('tab.game', {
-      url: '/game',
-      views: {
-        'tab-game': {
-          templateUrl: 'templates/tab-game.html',
-          controller: 'GameCtrl'
-        }
-      }
+    .state('game', {
+        url: '/game',
+        templateUrl: 'templates/game.html',
+        controller: 'GameCtrl'
     })
 
-    .state('tab.settings', {
-      url: '/settings',
-      views: {
-        'tab-settings': {
-          templateUrl: 'templates/tab-settings.html',
-          controller: 'SettingsCtrl'
-        }
-      }
+    .state('settings', {
+        url: '/settings',
+        templateUrl: 'templates/settings.html',
+        controller: 'SettingsCtrl'
     });
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/dash');
+  $urlRouterProvider.otherwise('/');
 
 });
 
