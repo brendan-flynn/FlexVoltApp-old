@@ -92,7 +92,7 @@ angular.module('flexvolt', ['ionic', 'flexvolt.controllers', 'flexvolt.services'
     .state('tab.game', {
       url: '/game',
       views: {
-        'tab-friends': {
+        'tab-game': {
           templateUrl: 'templates/tab-game.html',
           controller: 'GameCtrl'
         }

@@ -7,13 +7,11 @@
     <button ng-click="readAll()">get data!</button>
     <button ng-click="poll()">poll version</button>
     <button ng-click="flexvolt.updateSettings()">Update Settings</button>
-    <button ng-click="flexvolt.turnDataOn()">Data ON</button>
     <br><br>
+    <button ng-click="flexvolt.turnDataOn()">Data ON</button>
     <button ng-click="flexvolt.turnDataOff()">Data OFF</button>
-    <button ng-click="flexvolt.sendTest()">Send Test</button>
-    <p>Communications Log:<br>
-        <pre ng-bind="flexvolt.debugging.communicationsLog"></pre>
-    </p>
+    <br><br>
+    <button ng-click="getData()">get actual data</button>
     <div id="plotWindow"></div>
   </ion-content>
 </ion-view>

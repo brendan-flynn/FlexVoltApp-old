@@ -34,8 +34,10 @@ public class BluetoothSerial extends CordovaPlugin {
     private static final String WRITE = "write";
     private static final String WRITE_BUFFER = "writeBuffer";
     private static final String AVAILABLE = "available";
+    private static final String AVAILABLE_BYTES = "available";
     private static final String READ = "read";
     private static final String READ_BUFFER = "readBuffer";
+    private static final String READ_BUFFER_N_BYTES = "readBufferNBytes";
     private static final String READ_UNTIL = "readUntil";
     private static final String SUBSCRIBE = "subscribe";
     private static final String UNSUBSCRIBE = "unsubscribe";
@@ -121,6 +123,10 @@ public class BluetoothSerial extends CordovaPlugin {
 
             callbackContext.success(available());
 
+        } else if (action.equals(AVAILABLE_BYTES)) {
+
+            callbackContext.success(availableBytes());
+
         } else if (action.equals(READ)) {
 
             callbackContext.success(read());
@@ -128,6 +134,11 @@ public class BluetoothSerial extends CordovaPlugin {
         } else if (action.equals(READ_BUFFER)) {
 
             callbackContext.success(readBuffer());
+
+        } else if (action.equals(READ_BUFFER_N_BYTES)) {
+
+            int nBytes = args.getInt(0);
+            callbackContext.success(readBufferNBytes(nBytes));
 
         } else if (action.equals(READ_UNTIL)) {
 
@@ -307,11 +318,16 @@ public class BluetoothSerial extends CordovaPlugin {
     private int available() {
         return buffer.length();
     }
-
+    
+    private int availableBytes() {
+        return byteBuffer.size();
+    }
+    
     private String read() {
         int length = buffer.length();
         String data = buffer.substring(0, length);
         buffer.delete(0, length);
+        byteBuffer.clear(); // BPF added to avoid overflow
         return data;
     }
 
@@ -324,6 +340,23 @@ public class BluetoothSerial extends CordovaPlugin {
             bytes[j++] = b.byteValue();
 
         byteBuffer.clear();
+        buffer.delete(0, buffer.length()); // BPF added to avoid ofverflow
+        return bytes;
+    }
+    
+    private byte[] readBufferNBytes(int n) {
+        List<Byte> subList = byteBuffer.subList(0,n);
+        Byte[] byteObjects = subList.toArray(new Byte[subList.size()]);
+        byte[] bytes = new byte[byteObjects.length];
+        int j=0;
+        // Unboxing byte values. (Byte[] to byte[])
+        for(Byte b: byteObjects)
+            bytes[j++] = b.byteValue();
+
+        for (int i = 0; i < n; i ++){
+            byteBuffer.remove(i);
+        }
+        buffer.delete(0, n); // BPF added to avoid ofverflow
         return bytes;
     }
 
