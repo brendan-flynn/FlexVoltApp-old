@@ -34,7 +34,7 @@ public class BluetoothSerial extends CordovaPlugin {
     private static final String WRITE = "write";
     private static final String WRITE_BUFFER = "writeBuffer";
     private static final String AVAILABLE = "available";
-    private static final String AVAILABLE_BYTES = "available";
+    private static final String AVAILABLE_BYTES = "availableBytes";
     private static final String READ = "read";
     private static final String READ_BUFFER = "readBuffer";
     private static final String READ_BUFFER_N_BYTES = "readBufferNBytes";
@@ -327,20 +327,29 @@ public class BluetoothSerial extends CordovaPlugin {
         int length = buffer.length();
         String data = buffer.substring(0, length);
         buffer.delete(0, length);
-        byteBuffer.clear(); // BPF added to avoid overflow
+        //byteBuffer.clear(); // BPF added to avoid overflow
         return data;
     }
 
     private byte[] readBuffer() {
+        //BPF commented
         Byte[] byteObjects = byteBuffer.toArray(new Byte[byteBuffer.size()]);
         byte[] bytes = new byte[byteObjects.length];
         int j=0;
         // Unboxing byte values. (Byte[] to byte[])
         for(Byte b: byteObjects)
-            bytes[j++] = b.byteValue();
+            if (b != null) 
+                bytes[j++] = b;
+        
+        // BPF method:
+//        int n = byteBuffer.size();
+//        byte[] bytes = new byte[n];
+//        for (int i = 0; i < n; i++){
+//            bytes[i] = byteBuffer.get(i);
+//        }
 
         byteBuffer.clear();
-        buffer.delete(0, buffer.length()); // BPF added to avoid ofverflow
+        //buffer.delete(0, buffer.length()); // BPF added to avoid ofverflow
         return bytes;
     }
     
@@ -356,7 +365,7 @@ public class BluetoothSerial extends CordovaPlugin {
         for (int i = 0; i < n; i ++){
             byteBuffer.remove(i);
         }
-        buffer.delete(0, n); // BPF added to avoid ofverflow
+        //buffer.delete(0, n); // BPF added to avoid ofverflow
         return bytes;
     }
 

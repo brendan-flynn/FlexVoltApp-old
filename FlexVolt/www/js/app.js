@@ -34,8 +34,27 @@ angular.module('flexvolt', ['ionic', 'flexvolt.controllers', 'flexvolt.services'
         window.cancelAnimationFrame = (function() {
             return window.cancelAnimationFrame || window.mozCancelAnimationFrame ||
                     window.webkitCancelAnimationFrame;
-        })()
+        })();
     }
+    
+    function doOnOrientationChange()
+    {
+        switch(window.orientation) 
+        {  
+            case -90:
+                console.log('-landscape');
+                break; 
+            case 90:
+                console.log('landscape');
+                break; 
+            default:
+                console.log('portrait');
+                break; 
+        }
+    }
+
+    window.addEventListener('orientationchange', doOnOrientationChange);
+
 
   });
 })

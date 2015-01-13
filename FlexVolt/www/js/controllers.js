@@ -20,7 +20,7 @@ angular.module('flexvolt.controllers', [])
                     btnName:"directional"
                 },
                 b4: {
-                    icon:"icon ion-gear-b",
+                    icon:"icon ion-settings",
                     ref:"settings",
                     btnName:"settings"
                 }

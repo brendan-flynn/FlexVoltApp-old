@@ -417,7 +417,7 @@ angular.module('flexvolt.flexvolt', [])
     function getDataParsed(){
         if (!checkingForData){
             checkingForData = true;
-            bluetoothSerial.available(function (nBytesAvailable){
+            bluetoothSerial.availableBytes(function (nBytesAvailable){
                 if ((nBytesAvailable+dataOverFlow.length) >= api.readParams.expectedBytes){
                     console.log('nBytes = '+nBytesAvailable);
                     collectAllBytes(function(dataIn){
@@ -468,10 +468,10 @@ angular.module('flexvolt.flexvolt', [])
     }
     function collectAllBytes(cb) {
         //console.log('collecting');
-        var t;
-        var elapsed;
+        //var t;
+        //var elapsed;
         function pollFunc () {
-            t = new Date().getMilliseconds();
+            //t = new Date().getMilliseconds();
             if (!reading){
                 reading = true;
                 bluetoothSerial.readBuffer(readSuccess, readFailTryAgain);
@@ -479,8 +479,8 @@ angular.module('flexvolt.flexvolt', [])
         }
         function readSuccess ( data ) {
             reading = false;
-            elapsed = (new Date().getMilliseconds())-t;
-            console.log(elapsed +'ms');
+            //elapsed = (new Date().getMilliseconds())-t;
+            //console.log(elapsed +'ms');
             var arr = new Uint8Array(data);
             //console.log(arr);
             var norm = Array.prototype.slice.call(arr);
@@ -488,8 +488,9 @@ angular.module('flexvolt.flexvolt', [])
             cb(norm);
         }
         function readFailTryAgain(msg){
+            reading = false;
             console.log('read failed, probably null msg = '+msg);
-            collectAllBytes(cb);
+            //collectAllBytes(cb);
         }
         pollFunc();
         //$timeout(pollFunc, 100);
