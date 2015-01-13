@@ -53,7 +53,11 @@ angular.module('flexvolt', ['ionic', 'flexvolt.controllers', 'flexvolt.services'
         }
     }
 
-    window.addEventListener('orientationchange', doOnOrientationChange);
+//    window.addEventListener('orientationchange', doOnOrientationChange);
+    
+    window.onresize = function(){ 
+        setTimeout(doOnOrientationChange,0);
+    };
 
 
   });
@@ -69,23 +73,17 @@ angular.module('flexvolt', ['ionic', 'flexvolt.controllers', 'flexvolt.services'
         templateUrl: 'templates/home.html',
         controller: 'HomeCtrl'
     })
-
-    // Each tab has its own nav history stack:
-
-//    .state('tab.dash', {
-//      url: '/dash',
-//      views: {
-//        'tab-dash': {
-//          templateUrl: 'templates/tab-dash.html',
-//          controller: 'DashCtrl'
-//        }
-//      }
-//    })
-
-    .state('plot', {
-        url: '/plot',
-        templateUrl: 'templates/plot.html',
-        controller: 'PlotCtrl'
+    
+    .state('trace', {
+        url: '/trace',
+        templateUrl: 'templates/trace.html',
+        controller: 'TraceCtrl'
+    })
+    
+    .state('xy', {
+        url: '/xy',
+        templateUrl: 'templates/xy.html',
+        controller: 'XYCtrl'
     })
     
     .state('game', {
@@ -93,12 +91,45 @@ angular.module('flexvolt', ['ionic', 'flexvolt.controllers', 'flexvolt.services'
         templateUrl: 'templates/game.html',
         controller: 'GameCtrl'
     })
+    
+    .state('myometer', {
+        url: '/myometer',
+        templateUrl: 'templates/myometer.html',
+        controller: 'MyometerCtrl'
+    })
+    
+    .state('hrv', {
+        url: '/hrv',
+        templateUrl: 'templates/hrv.html',
+        controller: 'HRVCtrl'
+    })
+    
+    .state('plot', {
+        url: '/plot',
+        templateUrl: 'templates/plot.html',
+        controller: 'PlotCtrl'
+    })
+    
+    .state('circle', {
+        url: '/circle',
+        templateUrl: 'templates/circle.html',
+        controller: 'CircleCtrl'
+    })
+
+    .state('help', {
+        url: '/help',
+        templateUrl: 'templates/help.html',
+        controller: 'HelpCtrl'
+    })
+
 
     .state('settings', {
         url: '/settings',
         templateUrl: 'templates/settings.html',
         controller: 'SettingsCtrl'
-    });
+    })
+ 
+    ;
 
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/');

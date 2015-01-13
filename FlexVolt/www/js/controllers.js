@@ -11,48 +11,49 @@ angular.module('flexvolt.controllers', [])
                 },
                 b2: {
                     icon:"icon ion-ios-pulse-strong",
-                    ref:"plot",
+                    ref:"trace",
                     btnName:"trace"
                 },
                 b3: {
                     icon:"icon ion-ios-navigate",
-                    ref:"game",
-                    btnName:"directional"
+                    ref:"xy",
+                    btnName:"X-Y"
                 },
                 b4: {
-                    icon:"icon ion-settings",
-                    ref:"settings",
-                    btnName:"settings"
+                    icon:"icon ion-ios-game-controller-b",
+                    ref:"game",
+                    btnName:"Game"
                 }
             },
             row2:
             {    
                 b1:{
-                    icon:"icon ion-nuclear",
-                    ref:"home",
-                    btnName:"activity"
+                    icon:"icon ion-speedometer",
+                    ref:"myometer",
+                    btnName:"Myometer"
                 },
                 b2:{
-                    icon:"icon ion-leaf",
-                    ref:"home",
-                    btnName:"peace"
+                    icon:"icon ion-ios-heart",
+                    ref:"hrv",
+                    btnName:"HRV"
+
                 },
                 b3:{
                     icon:"icon ion-model-s",
                     ref:"home",
-                    btnName:"drive"
+                    btnName:"Drive"
                 },
                 b4:{
-                    icon:"icon ion-ios-heart",
+                    icon:"icon ion-leaf",
                     ref:"home",
-                    btnName:"heart"
+                    btnName:"Relax"                 
                 }
             },
             row3:{   
                 b1:{
-                    icon:"icon ion-ios-speedometer",
+                    icon:"icon ion-nuclear",
                     ref:"home",
-                    btnName:"meter"
+                    btnName:"activity"
                 },
                 b2:{
                     icon:"icon ion-ios-infinite",
@@ -69,62 +70,230 @@ angular.module('flexvolt.controllers', [])
                     ref:"home",
                     btnName:"controller"
                 }
+            },
+            row4:{   
+                b1:{
+                    icon:"icon ion-navigate",
+                    ref:"circle",
+                    btnName:"test"
+                },
+                b2:{
+                    icon:"icon ion-ios-pulse",
+                    ref:"plot",
+                    btnName:"test"
+                },
+                b3:{
+                    icon:"icon ion-help",
+                    ref:"help",
+                    btnName:"Help"
+                },
+                b4:{
+                    icon:"icon ion-settings",
+                    ref:"settings",
+                    btnName:"settings"
+                }
             }
         };
 })
-.controller('DashCtrl', function($scope) {
+.controller('XYCtrl', function($scope, $state) {
+    var afID;
+    var currentUrl = $state.current.url;
+    console.log('currentUrl = '+currentUrl);
+    
+    var mar = 10;
+    var margin = {top: mar, right: mar, bottom: mar, left: mar},
+          width = 600 - margin.left - margin.right,
+          height = 200 - margin.top - margin.bottom;
+    
+    function movingPlot(){
+        var dataset = [];
+        var svg = d3.select('#xyWindow').append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');    
+        
+        var color = ['red','blue'];
+        console.log(color);
+        
+        dataset[0]={
+            x:width/2,
+            y:height/2,
+            r:20
+        };
+    
+        svg.selectAll('circle')
+            .data(dataset)
+            .enter().append("circle")
+            .style("stroke", "gray")
+            .style("fill", "green")
+            .attr("r", function(d){return d.r;})
+            .attr("cx", function(d){return d.x;})
+            .attr("cy", function(d){return d.y;});
+        
+        function updateAnimate(){
+            if (!flexvolt.isConnected){return;}
+            
+            var dataIn = flexvolt.getDataParsed();
+            if (dataIn === null){return;}
+            var n = dataIn[0].length;
+            if (n === 0){return;}
+            //console.log('got data');
+            //console.log(dataIn);
+            
+            dataset[0].x = dataIn[0][n];
+            dataset[0].y = dataIn[1][n];
 
-    $scope.apps = [
-            {
-                icon:"icon ion-home",
-                btnName:"home"
-            },{
-                icon:"icon ion-ios-pulse-strong",
-                btnName:"trace"
-            },{
-                icon:"icon ion-ios-navigate",
-                btnName:"directional"
-            },{
-                icon:"icon ion-gear-b",
-                btnName:"settings"
-            },{
-                icon:"icon ion-nuclear",
-                btnName:"activity"
-            },{
-                icon:"icon ion-leaf",
-                btnName:"peace"
-            },{
-                icon:"icon ion-model-s",
-                btnName:"drive"
-            },{
-                icon:"icon ion-ios-heart",
-                btnName:"heart"
-            },{
-                icon:"icon ion-ios-speedometer",
-                btnName:"meter"
-            },{
-                icon:"icon ion-ios-infinite",
-                btnName:"mind"
-            },{
-                icon:"icon ion-ios-body",
-                btnName:"excercise"
-            },{
-                icon:"icon ion-ios-game-controller-b",
-                btnName:"controller"
+            svg.selectAll('circle').remove();
+            svg.selectAll('circle')
+                .data(dataset)
+                .enter().append("circle")
+                .style("stroke", "green")
+                .style("fill", "green")
+                .attr("r", function(d){return d.r;})
+                .attr("cx", function(d){return d.y;})
+                .attr("cy", function(d){return d.x;});
+        }
+        
+        function paintStep(timestamp){
+            if ($state.current.url === '/xy'){
+                afID = window.requestAnimationFrame(paintStep);
+                //console.log('repainting '+timestamp);
+                updateAnimate();
             }
-        ];
-    //var element = document.getElementById('slider');
-    //var start = null;
-    //var cbID = null;
+        }
+        
+        paintStep();
+    }
+
+    movingPlot();
+})
+.controller('CircleCtrl', function($scope, $state) {
+    var afID;
+    var currentUrl = $state.current.url;
+    console.log('currentUrl = '+currentUrl);
     
-//    function paintStep(timestamp){
-//        window.requestAnimationFrame(paintStep);
-//        //console.log('repainting '+timestamp);
-//    }
-//    
-//    paintStep();
+    var mar = 10;
+    var margin = {top: mar, right: mar, bottom: mar, left: mar},
+          width = 400 - margin.left - margin.right,
+          height = 400 - margin.top - margin.bottom;
+    console.log('w: '+width+', h:'+height);
     
-    //cbID = window.requestAnimationFrame(paintStep);
+    function movingPlot(){
+        var dataset = [];
+        var frameCounts = 0;
+        var speed = 5;
+        var svg = d3.select('#circleWindow').append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');    
+        
+        var color = ['red','blue'];
+        console.log(color);
+        
+        dataset[0]={
+            x:width/2,
+            y:height/2,
+            r:20
+        };
+        //console.log(dataset);
+    
+        svg.selectAll('circle')
+            .data(dataset)
+            .enter().append("circle")
+            .style("stroke", "gray")
+            .style("fill", "green")
+            .attr("r", function(d){return d.r;})
+            .attr("cx", function(d){return d.x;})
+            .attr("cy", function(d){return d.y;});
+        
+        function updateAnimate(){
+            dataset[0].x += (speed*(Math.random()-0.5))%width;
+            dataset[0].y += (speed*(Math.random()-0.5))%height;
+            console.log(dataset);
+
+            svg.selectAll('circle').remove();
+            svg.selectAll('circle')
+                .data(dataset)
+                .enter().append("circle")
+                .style("stroke", "green")
+                .style("fill", "green")
+                .attr("r", function(d){return d.r;})
+                .attr("cx", function(d){return d.y;})
+                .attr("cy", function(d){return d.x;});
+        }
+        
+        function paintStep(timestamp){
+            if ($state.current.url === '/circle'){
+                afID = window.requestAnimationFrame(paintStep);
+                //console.log('repainting '+timestamp);
+                frameCounts++;
+                if (frameCounts > 0){
+                    frameCounts = 0;
+                    updateAnimate();
+                }
+            }
+        }
+        
+        paintStep();
+    }
+
+    movingPlot();
+})
+.controller('GameCtrl', function($scope, $state) {
+    var afID;
+    var currentUrl = $state.current.url;
+    console.log('currentUrl = '+currentUrl);
+    
+    function updateAnimate(){
+    }
+    
+    function paintStep(timestamp){
+        if ($state.current.url === '/game'){
+            afID = window.requestAnimationFrame(paintStep);
+            //console.log('repainting '+timestamp);
+            updateAnimate();
+        }
+    }
+
+    paintStep();
+})
+
+.controller('MyometerCtrl', function($scope, $state) {
+    var afID;
+    var currentUrl = $state.current.url;
+    console.log('currentUrl = '+currentUrl);
+    
+    function updateAnimate(){
+    }
+    
+    function paintStep(timestamp){
+        if ($state.current.url === '/myometer'){
+            afID = window.requestAnimationFrame(paintStep);
+            //console.log('repainting '+timestamp);
+            updateAnimate();
+        }
+    }
+
+    paintStep();
+})
+
+.controller('HRVCtrl', function($scope, $state) {
+    var currentUrl = $state.current.url;
+    var afID;
+    console.log('currentUrl = '+currentUrl);
+    
+    function updateAnimate(){
+    }
+    
+    function paintStep(timestamp){
+        if ($state.current.url === '/hrv'){
+            afID = window.requestAnimationFrame(paintStep);
+            //console.log('repainting '+timestamp);
+            updateAnimate();
+        }
+    }
+
+    paintStep();
 })
 
 .controller('PlotCtrl', function($scope, $state, Friends) {
@@ -255,7 +424,7 @@ angular.module('flexvolt.controllers', [])
     movingPlot();
 })
 
-.controller('GameCtrl', function($scope, $state, flexvolt) {
+.controller('TraceCtrl', function($scope, $state, flexvolt) {
     var afID;
     
     $scope.turnOn = flexvolt.turnDataOn();
@@ -352,7 +521,7 @@ angular.module('flexvolt.controllers', [])
         
         function paintStep(timestamp){
 //            console.log('paintStep in Game');
-            if ($state.current.url === '/game'){
+            if ($state.current.url === '/trace'){
                 afID = window.requestAnimationFrame(paintStep);
                 updateAnimate();
             }
@@ -362,6 +531,13 @@ angular.module('flexvolt.controllers', [])
     }
 
     movingPlot();
+})
+
+.controller('HelpCtrl', function($scope, $state) {
+    var currentUrl = $state.current.url;
+    console.log('currentUrl = '+currentUrl);
+    
+    $scope.text = 'Help section 1';
 })
 
 .controller('SettingsCtrl', function($scope, $state, flexvolt) {
