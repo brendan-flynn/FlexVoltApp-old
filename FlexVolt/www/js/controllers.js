@@ -90,15 +90,17 @@ angular.module('flexvolt.controllers', [])
                 b4:{
                     icon:"icon ion-settings",
                     ref:"settings",
-                    btnName:"settings"
+                    btnName:"Connection"
                 }
             }
         };
 })
-.controller('XYCtrl', function($scope, $state) {
+.controller('XYCtrl', function($scope, $state, flexvolt) {
     var afID;
     var currentUrl = $state.current.url;
     console.log('currentUrl = '+currentUrl);
+    
+    $scope.nCircles = 3;
     
     var mar = 10;
     var margin = {top: mar, right: mar, bottom: mar, left: mar},
@@ -112,43 +114,46 @@ angular.module('flexvolt.controllers', [])
             .attr('height', height + margin.top + margin.bottom)
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');    
         
-        var color = ['red','blue'];
-        console.log(color);
+        var colorList = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
         
-        dataset[0]={
-            x:width/2,
-            y:height/2,
-            r:20
-        };
+        for (var i = 0; i < nCircles; i++){
+            dataset[i]={
+                x:width/2,
+                y:height/2,
+                r:20,
+                c:colorList[i]
+            };
+        }
     
         svg.selectAll('circle')
             .data(dataset)
             .enter().append("circle")
-            .style("stroke", "gray")
-            .style("fill", "green")
+            .style("stroke", function(d){return d.c;})
+            .style("fill", function(d){return d.c;})
             .attr("r", function(d){return d.r;})
             .attr("cx", function(d){return d.x;})
             .attr("cy", function(d){return d.y;});
         
         function updateAnimate(){
+            
             if (!flexvolt.isConnected){return;}
-            
             var dataIn = flexvolt.getDataParsed();
-            if (dataIn === null){return;}
-            var n = dataIn[0].length;
-            if (n === 0){return;}
-            //console.log('got data');
-            //console.log(dataIn);
+            if (dataIn === null || dataIn[0].length === 0){return;}
             
-            dataset[0].x = dataIn[0][n];
-            dataset[0].y = dataIn[1][n];
+            var n = dataIn[0].length;
+            
+            for (var i = 0; i < Math.min(dataIn.length,$scope.nCircles); i++){
+                dataset[i].x = dataIn[i][n-1];
+                dataset[i].y = dataIn[i][n-1];
+                dataset[i].c = colorList[i];
+            }
 
             svg.selectAll('circle').remove();
             svg.selectAll('circle')
                 .data(dataset)
                 .enter().append("circle")
-                .style("stroke", "green")
-                .style("fill", "green")
+                .style("stroke", function(d){return d.c;})
+                .style("fill", function(d){return d.c;})
                 .attr("r", function(d){return d.r;})
                 .attr("cx", function(d){return d.y;})
                 .attr("cy", function(d){return d.x;});
@@ -209,7 +214,7 @@ angular.module('flexvolt.controllers', [])
         function updateAnimate(){
             dataset[0].x += (speed*(Math.random()-0.5))%width;
             dataset[0].y += (speed*(Math.random()-0.5))%height;
-            console.log(dataset);
+            //console.log(dataset);
 
             svg.selectAll('circle').remove();
             svg.selectAll('circle')
@@ -298,6 +303,8 @@ angular.module('flexvolt.controllers', [])
 
 .controller('PlotCtrl', function($scope, $state, Friends) {
     $scope.friends = Friends.all();
+    $scope.nSignals = 4;
+    var colorList = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
     
     var afID;
     
@@ -306,8 +313,8 @@ angular.module('flexvolt.controllers', [])
     
     var mar = 10;
     var margin = {top: mar, right: mar, bottom: mar, left: mar},
-          width = 600 - margin.left - margin.right,
-          height = 200 - margin.top - margin.bottom;
+          width = 400 - margin.left - margin.right,
+          height = 400 - margin.top - margin.bottom;
     
     function movingPlot(){
         var xPos = 0, startPos = 0;
@@ -320,14 +327,23 @@ angular.module('flexvolt.controllers', [])
             .range([height, 0])
             .domain([-128, 127]);
     
-        var yA = [];
-        yA[0] = d3.scale.linear()
-            .range([height, height/2])
-            .domain([-128, 127]);
+        console.log('here 1');
     
-        yA[1] = d3.scale.linear()
-            .range([height/2, 0])
-            .domain([-128, 127]);
+        var yA = [];
+        for (var i = 0; i < $scope.nSignals; i++){
+            yA[i] = d3.scale.linear()
+                .range([height-i*(height/$scope.nSignals), height-(i+1)*(height/$scope.nSignals)])
+                .domain([-128, 127]);
+        }
+//        yA[0] = d3.scale.linear()
+//            .range([height, height/2])
+//            .domain([-128, 127]);
+//    
+//        yA[1] = d3.scale.linear()
+//            .range([height/2, 0])
+//            .domain([-128, 127]);
+
+        console.log('here 2');
     
         var svg = d3.select('#plotWindow').append('svg')
             .attr('width', width + margin.left + margin.right)
@@ -335,79 +351,87 @@ angular.module('flexvolt.controllers', [])
           .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');    
 
-        var line = d3.svg.line()
-            .x(function(d,i) { return (startPos + i);})
-            .y(function(d) { return y(d); });
+//        var line = d3.svg.line()
+//            .x(function(d,i) { return (startPos + i);})
+//            .y(function(d) { return y(d); });
+
+        console.log('here 3');
     
         var lineA = [];
-        lineA[0] = d3.svg.line()
-            .x(function(d,i) { return (startPos + i);})
-            .y(function(d) { return yA[0](d); });
-    
-        lineA[1] = d3.svg.line()
-            .x(function(d,i) { return (startPos + i);})
-            .y(function(d) { return yA[1](d); });
+//        for (var dummy = 0; dummy < $scope.nSignals; dummy++){
+//            lineA[dummy] = d3.svg.line()
+//                .x(function(d,i) { return (startPos + i);})
+//                .y(function(d) { return yA[dummy](d); });
+//        }
+        if ($scope.nSignals > 0){
+            lineA[0] = d3.svg.line()
+                .x(function(d,i) { return (startPos + i);})
+                .y(function(d) { return yA[0](d); });
+        }
+        if ($scope.nSignals > 1){
+            lineA[1] = d3.svg.line()
+                .x(function(d,i) { return (startPos + i);})
+                .y(function(d) { return yA[1](d); });
+        }
+        if ($scope.nSignals > 2){
+            lineA[2] = d3.svg.line()
+                .x(function(d,i) { return (startPos + i);})
+                .y(function(d) { return yA[2](d); });
+        }
+        if ($scope.nSignals > 3){
+            lineA[3] = d3.svg.line()
+                .x(function(d,i) { return (startPos + i);})
+                .y(function(d) { return yA[3](d); });
+        }
+        if ($scope.nSignals > 4){
+            lineA[4] = d3.svg.line()
+                .x(function(d,i) { return (startPos + i);})
+                .y(function(d) { return yA[4](d); });
+        }
       
         data = [];
-        data[0] = [];
-        data[1] = [];
+        for (var i = 0; i < $scope.nSignals; i++){ data[i]=[]; }
         for (var i = 0; i < 20; i++){
-            data[0].push(256*(Math.random()-0.5));
-            data[1].push(256*(Math.random()-0.5));
+            for (var j = 0; j < $scope.nSignals; j++){
+                data[j].push(256*(Math.random()-0.5));
+            }
         }
         
-        var color = ['red','blue'];
-        console.log(color);
+        console.log('here 4, signals = '+$scope.nSignals);
     
-        for (var i = 0; i < 2; i++){
+        for (var i = 0; i < $scope.nSignals; i++){
             svg.append('svg:path')
                 .attr('class','line')
-                .attr('stroke', color[i])
+                .attr('stroke', colorList[i])
                 .attr('d', lineA[i](data[i]));
         }
         
         function updateAnimate(){
-//            var data = [0,1];
-//            for (var i = 0; i < width; i++){
-//                data.push(256*(Math.random()-0.5));
-//            }
-            data[0] = [];
-            data[1] = [];
+
+            data = [];
+            for (var i = 0; i < $scope.nSignals; i++){ data[i]=[]; }
             startPos = xPos;
             for (var i = 0; i < 20; i++){
-                //data.shift();
-                data[0].push(256*(Math.random()-0.5));
-                data[1].push(256*(Math.random()-0.5));
+                for (var j = 0; j < $scope.nSignals; j++){
+                    data[j].push(256*(Math.random()-0.5));
+                }
                 xPos++;
                 if (xPos >= width){
                     console.log('clearing');
-                    data[0] = [];
-                    data[1] = [];
+                    for (var i = 0; i < $scope.nSignals; i++){ data[i]=[]; }
                     xPos = 0;
                     startPos = xPos;
                     svg.selectAll('path.line').remove();
-                        //.data([data])
-//                        .attr('class','line')
-//                        .attr('d', line(data));
                 }
             }
             
-            
-            
-            for (var i = 0; i < 2; i++){
+            for (var i = 0; i < $scope.nSignals; i++){
                 svg.append('svg:path')
                     .attr('class','line')
-                    .attr('stroke', color[i])
+                    .attr('stroke', colorList[i])
                     .attr('d', lineA[i](data[i]));
             }
-//            svg.selectAll('path')
-//                .data([data])
-//                .attr('class','line')
-//                .attr('d', line);
-            
-            
-//            xPos += data.length;
-//            if (xPos >= width){xPos=0;}
+
         }
         
         function paintStep(timestamp){
@@ -426,6 +450,8 @@ angular.module('flexvolt.controllers', [])
 
 .controller('TraceCtrl', function($scope, $state, flexvolt) {
     var afID;
+    $scope.nSignals = 4;
+    var colorList = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
     
     $scope.turnOn = flexvolt.turnDataOn();
     
@@ -453,7 +479,7 @@ angular.module('flexvolt.controllers', [])
             .range([height/2, 0])
             .domain([0, 255]);
     
-        var svg = d3.select('#gamePlotWindow').append('svg')
+        var svg = d3.select('#traceWindow').append('svg')
             .attr('width', width + margin.left + margin.right)
             .attr('height', height + margin.top + margin.bottom)
           .append('g')
@@ -565,4 +591,10 @@ angular.module('flexvolt.controllers', [])
         console.log('got:');
         console.log(data);
     };
-});
+})
+.controller('MainCtrl', function($scope, $state) {
+    
+    console.log($state);
+    
+})
+;

@@ -1,20 +1,10 @@
 <ion-view title="Home">
   <ion-content class="has-header padding">
-      <div ng-repeat="row in apps" class="row my-icon-row">
-        <div ng-repeat="icon in row" class="col my-icon-col">
-                <button class="button-icon" ui-sref="{{icon.ref}}"><i class="icon {{icon.icon}} home-page-icons"></i>{{icon.btnName}}</button>
-        </div>
-    </div>
-<!--    <div ng-repeat="appIcon in apps">
-        <div ng-if="$index%4==0" class="row my-icon-row">
-            <div class="col my-icon-col">
-                <button class="button-icon" ui-sref="{{apps[$index+0].ref}}"><i class="icon {{apps[$index+0].icon}} home-page-icons"></i>{{apps[$index+0].btnName}}</button>
-                <button class="button-icon" ui-sref="{{apps[$index+1].ref}}"><i class="icon {{apps[$index+1].icon}} home-page-icons"></i>{{apps[$index+1].btnName}}</button>
-                <button class="button-icon" ui-sref="{{apps[$index+2].ref}}"><i class="icon {{apps[$index+2].icon}} home-page-icons"></i>{{apps[$index+2].btnName}}</button>
-                <button class="button-icon" ui-sref="{{apps[$index+3].ref}}"><i class="icon {{apps[$index+3].icon}} home-page-icons"></i>{{apps[$index+3].btnName}}</button>
+        <div ng-repeat="row in apps" class="row my-icon-row">
+            <div ng-repeat="icon in row" class="col my-icon-col">
+                    <button class="button-icon" ui-sref="{{icon.ref}}"><i class="icon {{icon.icon}} home-page-icons"></i>{{icon.btnName}}</button>
             </div>
         </div>
-    </div>-->
     <div id ="slider">a</div>
   </ion-content>
 </ion-view>

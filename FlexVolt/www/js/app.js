@@ -115,6 +115,12 @@ angular.module('flexvolt', ['ionic', 'flexvolt.controllers', 'flexvolt.services'
         templateUrl: 'templates/circle.html',
         controller: 'CircleCtrl'
     })
+    
+    .state('circle.settings', {
+        url: '/circle-settings',
+        templateUrl: 'templates/circle-settings.html',
+        controller: 'CircleCtrl'
+    })
 
     .state('help', {
         url: '/help',

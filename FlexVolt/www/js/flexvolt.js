@@ -419,7 +419,7 @@ angular.module('flexvolt.flexvolt', [])
             checkingForData = true;
             bluetoothSerial.availableBytes(function (nBytesAvailable){
                 if ((nBytesAvailable+dataOverFlow.length) >= api.readParams.expectedBytes){
-                    console.log('nBytes = '+nBytesAvailable);
+                    //console.log('nBytes = '+nBytesAvailable);
                     collectAllBytes(function(dataIn){
                         // prepend over flow from previous
                         dataIn = dataOverFlow.concat(dataIn);
@@ -427,20 +427,27 @@ angular.module('flexvolt.flexvolt', [])
                         // calculate number of full samples
                         //console.log(dataIn);
                         //console.log(dataIn.length+' length, of '+api.readParams.expectedBytes+', expected');
-                        var nSamples = Math.floor(0.01+(dataIn.length/api.readParams.expectedBytes));
-                        //console.log(nSamples+' samples receiveded');
-                        // initializeing parsed data vector
+                        //var nSamples = Math.floor(0.01+(dataIn.length/api.readParams.expectedBytes));
+                        //console.log(nSamples+' samples received');
+                        // initialize parsed data vector
                         dataParsed = new Array(api.settings.currentSignalNumber);
                         for (var i = 0; i < api.settings.currentSignalNumber; i++){ dataParsed[i]=[]; }
                         // Parse channels
-                        for (var i = 0; i < nSamples; i++){
-                            //console.log('first Char = '+dataIn[i*api.readParams.expectedBytes]);
-                            for (var j = 0; j < api.settings.currentSignalNumber; j++){
-                                dataParsed[j][i] = dataIn[i*api.readParams.expectedBytes+j+1];
+                        var readInd = 0, dataInd = 0;
+                        while(readInd < (dataIn.length-api.readParams.expectedBytes) ){
+                            var tmp = dataIn[readInd++];
+                            if (tmp === api.readParams.expectedChar){
+                                //console.log('got expected Char '+tmp);
+                                for (var i = 0; i < api.settings.currentSignalNumber; i++){
+                                    dataParsed[i][dataInd] = dataIn[readInd++];
+                                }
+                                dataInd++;
+                            } else {
+                                console.log('got unexpected Char '+tmp);
                             }
                         }
                         // Store any partial samples in over flow
-                        dataOverFlow = dataOverFlow.concat(dataIn.slice(nSamples*api.readParams.expectedBytes));
+                        dataOverFlow = dataIn.slice(readInd);
                     });
                 }
                 checkingForData = false;
