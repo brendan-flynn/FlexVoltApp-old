@@ -1,5 +1,31 @@
+<ion-nav-buttons side="right">
+    <button class="button button-icon icon ion-gear-b" ng-click="popover.show($event)"></button>
+</ion-nav-buttons>
+
 <ion-view title="Plot">
   <ion-content class="has-header">
     <div id="plotWindow"></div>
   </ion-content>
 </ion-view>
+
+<script id="plot-settings.html" type="text/ng-template">
+  <ion-popover-view>
+    <ion-header-bar>
+      <h1 class="title">Plot Settings</h1>
+    </ion-header-bar>
+    <ion-content>
+      <div class="item item-divider"> 
+        N Channels
+      </div>
+      <table>
+        <tr>
+          <td ng-repeat="item in channelList">
+            <ion-radio ng-value="item.value"
+                       ng-model="data.nChannels">
+              {{ item.text }}</ion-radio>
+          </td>
+        </tr>
+      </table>
+    </ion-content>
+  </ion-popover-view>
+</script>

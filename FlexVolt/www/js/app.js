@@ -5,7 +5,13 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('flexvolt', ['ionic', 'flexvolt.controllers', 'flexvolt.services', 'flexvolt.flexvolt'])
+angular.module('flexvolt', [
+    'ionic',
+    'flexvolt.controllers',
+    'flexvolt.services',
+    'flexvolt.flexvolt',
+    'flexvolt.xyDot'
+])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {

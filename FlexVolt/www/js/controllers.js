@@ -95,156 +95,90 @@ angular.module('flexvolt.controllers', [])
             }
         };
 })
-.controller('XYCtrl', function($scope, $state, flexvolt) {
+.controller('XYCtrl', function($scope, $state, flexvolt, xyDot, $ionicPopover) {
+    $ionicPopover.fromTemplateUrl('xy-settings.html', {
+        scope: $scope,
+      }).then(function(popover) {
+        $scope.popover = popover;
+      });
     var afID;
     var currentUrl = $state.current.url;
     console.log('currentUrl = '+currentUrl);
     
-    $scope.nCircles = 3;
+    var frameCounts = 0;
     
-    var mar = 10;
-    var margin = {top: mar, right: mar, bottom: mar, left: mar},
-          width = 600 - margin.left - margin.right,
-          height = 200 - margin.top - margin.bottom;
-    
-    function movingPlot(){
-        var dataset = [];
-        var svg = d3.select('#xyWindow').append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');    
+    xyDot.init('#xyWindow');
         
-        var colorList = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
-        
-        for (var i = 0; i < nCircles; i++){
-            dataset[i]={
-                x:width/2,
-                y:height/2,
-                r:20,
-                c:colorList[i]
-            };
-        }
-    
-        svg.selectAll('circle')
-            .data(dataset)
-            .enter().append("circle")
-            .style("stroke", function(d){return d.c;})
-            .style("fill", function(d){return d.c;})
-            .attr("r", function(d){return d.r;})
-            .attr("cx", function(d){return d.x;})
-            .attr("cy", function(d){return d.y;});
-        
-        function updateAnimate(){
-            
-            if (!flexvolt.isConnected){return;}
-            var dataIn = flexvolt.getDataParsed();
-            if (dataIn === null || dataIn[0].length === 0){return;}
-            
-            var n = dataIn[0].length;
-            
-            for (var i = 0; i < Math.min(dataIn.length,$scope.nCircles); i++){
-                dataset[i].x = dataIn[i][n-1];
-                dataset[i].y = dataIn[i][n-1];
-                dataset[i].c = colorList[i];
-            }
+    function updateAnimate(){
+        if (!flexvolt.isConnected){return;}
+        var dataIn = flexvolt.getDataParsed();
+        if (dataIn === null || dataIn === angular.undefined){return;}
 
-            svg.selectAll('circle').remove();
-            svg.selectAll('circle')
-                .data(dataset)
-                .enter().append("circle")
-                .style("stroke", function(d){return d.c;})
-                .style("fill", function(d){return d.c;})
-                .attr("r", function(d){return d.r;})
-                .attr("cx", function(d){return d.y;})
-                .attr("cy", function(d){return d.x;});
-        }
-        
-        function paintStep(timestamp){
-            if ($state.current.url === '/xy'){
-                afID = window.requestAnimationFrame(paintStep);
-                //console.log('repainting '+timestamp);
+        var n = dataIn[0].length;
+        if (n <= 0){return;}
+
+        var x = dataIn[0][n-1];
+        var y = dataIn[1][n-1];
+        console.log('x:'+x+', y:'+y);
+
+        xyDot.update(x,y);
+    }
+    
+    function paintStep(timestamp){
+        if ($state.current.url === '/xy'){
+            afID = window.requestAnimationFrame(paintStep);
+            frameCounts++;
+            if (frameCounts > 5){
+                frameCounts = 0;
                 updateAnimate();
             }
         }
-        
-        paintStep();
     }
+    
+    paintStep();
 
-    movingPlot();
 })
-.controller('CircleCtrl', function($scope, $state) {
+.controller('CircleCtrl', function($scope, $state, xyDot, $ionicPopover) {
+    $ionicPopover.fromTemplateUrl('circle-settings.html', {
+        scope: $scope,
+      }).then(function(popover) {
+        $scope.popover = popover;
+      });
     var afID;
     var currentUrl = $state.current.url;
     console.log('currentUrl = '+currentUrl);
     
-    var mar = 10;
-    var margin = {top: mar, right: mar, bottom: mar, left: mar},
-          width = 400 - margin.left - margin.right,
-          height = 400 - margin.top - margin.bottom;
-    console.log('w: '+width+', h:'+height);
+    var frameCounts = 0;
+    var speed = 4;
+    var x = 128, y = 128;
     
-    function movingPlot(){
-        var dataset = [];
-        var frameCounts = 0;
-        var speed = 5;
-        var svg = d3.select('#circleWindow').append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');    
+    xyDot.init('#circleWindow');
         
-        var color = ['red','blue'];
-        console.log(color);
-        
-        dataset[0]={
-            x:width/2,
-            y:height/2,
-            r:20
-        };
-        //console.log(dataset);
+    function updateAnimate(){
+        x = Math.min(Math.max(x+speed*(Math.random()-0.5),0),256);
+        y = Math.min(Math.max(y+speed*(Math.random()-0.5),0),256);
+        xyDot.update(x,y);
+    }
     
-        svg.selectAll('circle')
-            .data(dataset)
-            .enter().append("circle")
-            .style("stroke", "gray")
-            .style("fill", "green")
-            .attr("r", function(d){return d.r;})
-            .attr("cx", function(d){return d.x;})
-            .attr("cy", function(d){return d.y;});
-        
-        function updateAnimate(){
-            dataset[0].x += (speed*(Math.random()-0.5))%width;
-            dataset[0].y += (speed*(Math.random()-0.5))%height;
-            //console.log(dataset);
-
-            svg.selectAll('circle').remove();
-            svg.selectAll('circle')
-                .data(dataset)
-                .enter().append("circle")
-                .style("stroke", "green")
-                .style("fill", "green")
-                .attr("r", function(d){return d.r;})
-                .attr("cx", function(d){return d.y;})
-                .attr("cy", function(d){return d.x;});
-        }
-        
-        function paintStep(timestamp){
-            if ($state.current.url === '/circle'){
-                afID = window.requestAnimationFrame(paintStep);
-                //console.log('repainting '+timestamp);
-                frameCounts++;
-                if (frameCounts > 0){
-                    frameCounts = 0;
-                    updateAnimate();
-                }
+    function paintStep(timestamp){
+        if ($state.current.url === '/circle'){
+            afID = window.requestAnimationFrame(paintStep);
+            frameCounts++;
+            if (frameCounts > 5){
+                frameCounts = 0;
+                updateAnimate();
             }
         }
-        
-        paintStep();
     }
-
-    movingPlot();
+    
+    paintStep();
 })
-.controller('GameCtrl', function($scope, $state) {
+.controller('GameCtrl', function($scope, $state, $ionicPopover) {
+    $ionicPopover.fromTemplateUrl('game-settings.html', {
+        scope: $scope,
+      }).then(function(popover) {
+        $scope.popover = popover;
+      });
     var afID;
     var currentUrl = $state.current.url;
     console.log('currentUrl = '+currentUrl);
@@ -263,7 +197,12 @@ angular.module('flexvolt.controllers', [])
     paintStep();
 })
 
-.controller('MyometerCtrl', function($scope, $state) {
+.controller('MyometerCtrl', function($scope, $state, $ionicPopover) {
+    $ionicPopover.fromTemplateUrl('myometer-settings.html', {
+        scope: $scope,
+      }).then(function(popover) {
+        $scope.popover = popover;
+      });
     var afID;
     var currentUrl = $state.current.url;
     console.log('currentUrl = '+currentUrl);
@@ -282,7 +221,12 @@ angular.module('flexvolt.controllers', [])
     paintStep();
 })
 
-.controller('HRVCtrl', function($scope, $state) {
+.controller('HRVCtrl', function($scope, $state, $ionicPopover) {
+    $ionicPopover.fromTemplateUrl('hrv-settings.html', {
+        scope: $scope,
+      }).then(function(popover) {
+        $scope.popover = popover;
+      });
     var currentUrl = $state.current.url;
     var afID;
     console.log('currentUrl = '+currentUrl);
@@ -301,7 +245,24 @@ angular.module('flexvolt.controllers', [])
     paintStep();
 })
 
-.controller('PlotCtrl', function($scope, $state, Friends) {
+.controller('PlotCtrl', function($scope, $state, Friends, $ionicPopover) {
+    $ionicPopover.fromTemplateUrl('plot-settings.html', {
+        scope: $scope
+      }).then(function(popover) {
+        $scope.popover = popover;
+      });
+    
+    $scope.channelList = [
+        {text: "1", value: 1},
+        {text: "2", value: 2},
+        {text: "4", value: 4},
+        {text: "8", value: 8}
+    ];
+      
+    $scope.data = {
+        nChannels: 1
+    };
+    
     $scope.friends = Friends.all();
     $scope.nSignals = 4;
     var colorList = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
@@ -327,8 +288,6 @@ angular.module('flexvolt.controllers', [])
             .range([height, 0])
             .domain([-128, 127]);
     
-        console.log('here 1');
-    
         var yA = [];
         for (var i = 0; i < $scope.nSignals; i++){
             yA[i] = d3.scale.linear()
@@ -342,8 +301,6 @@ angular.module('flexvolt.controllers', [])
 //        yA[1] = d3.scale.linear()
 //            .range([height/2, 0])
 //            .domain([-128, 127]);
-
-        console.log('here 2');
     
         var svg = d3.select('#plotWindow').append('svg')
             .attr('width', width + margin.left + margin.right)
@@ -355,8 +312,7 @@ angular.module('flexvolt.controllers', [])
 //            .x(function(d,i) { return (startPos + i);})
 //            .y(function(d) { return y(d); });
 
-        console.log('here 3');
-    
+        // this one does NOT work.  it almost appears as though the dummy is incremented between line and .y
         var lineA = [];
 //        for (var dummy = 0; dummy < $scope.nSignals; dummy++){
 //            lineA[dummy] = d3.svg.line()
@@ -396,8 +352,6 @@ angular.module('flexvolt.controllers', [])
                 data[j].push(256*(Math.random()-0.5));
             }
         }
-        
-        console.log('here 4, signals = '+$scope.nSignals);
     
         for (var i = 0; i < $scope.nSignals; i++){
             svg.append('svg:path')
@@ -417,7 +371,7 @@ angular.module('flexvolt.controllers', [])
                 }
                 xPos++;
                 if (xPos >= width){
-                    console.log('clearing');
+                    //console.log('clearing');
                     for (var i = 0; i < $scope.nSignals; i++){ data[i]=[]; }
                     xPos = 0;
                     startPos = xPos;
@@ -448,7 +402,13 @@ angular.module('flexvolt.controllers', [])
     movingPlot();
 })
 
-.controller('TraceCtrl', function($scope, $state, flexvolt) {
+.controller('TraceCtrl', function($scope, $state, flexvolt, $ionicPopover) {
+    $ionicPopover.fromTemplateUrl('trace-settings.html', {
+        scope: $scope,
+      }).then(function(popover) {
+        $scope.popover = popover;
+      });
+      
     var afID;
     $scope.nSignals = 4;
     var colorList = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
@@ -514,10 +474,11 @@ angular.module('flexvolt.controllers', [])
             
             var dataIn = flexvolt.getDataParsed();
             
+            if (dataIn === null || dataIn === angular.undefined){return;}
             if (dataIn[0].length === 0){return;}
             //console.log('got data');
             //console.log(dataIn);
-            if (dataIn === null){return;}
+            
             
             data[0] = dataIn[0];
             data[1] = dataIn[1];
@@ -528,7 +489,7 @@ angular.module('flexvolt.controllers', [])
             
             xPos += data[0].length;
             if (xPos >= width){
-                console.log('clearing');
+                //console.log('clearing');
                 data[0] = [];
                 data[1] = [];
                 xPos = 0;
