@@ -28,8 +28,9 @@ angular.module('flexvolt.flexvolt', [])
  * Abstracts the flexvolt, deals with bluetooth communications, etc.
  */
   .factory('flexvolt', function($timeout, $interval) {
+    console.log('reset?');
     // api... contains the API that will be exposed via the 'flexvolt' service.
-    api = {
+    var api = {
         isConnected: false,
         disconnect: undefined,
         collectAllBytes: undefined,
@@ -384,6 +385,7 @@ angular.module('flexvolt.flexvolt', [])
                 api.readParams.expectedBytes = 11;
             }
         }
+        console.log(api.readParams);
         
     }
     function pollVersion(){
@@ -542,7 +544,6 @@ angular.module('flexvolt.flexvolt', [])
             dataV = new Uint8Array(tmp.length+data8.length);
             dataV.set(tmp);
             dataV.set(data8,tmp.length);
-            console.log(dataV);
             if (dataV.length >= dataMinLength){
                 $interval.cancel(poll);
                 cb(dataV);

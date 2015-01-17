@@ -10,7 +10,7 @@ angular.module('flexvolt', [
     'flexvolt.controllers',
     'flexvolt.services',
     'flexvolt.flexvolt',
-    'flexvolt.xyDot'
+    'flexvolt.d3plots'
 ])
 
 .run(function($ionicPlatform) {

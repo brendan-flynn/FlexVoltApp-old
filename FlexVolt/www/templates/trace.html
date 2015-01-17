@@ -1,22 +1,33 @@
-<ion-nav-buttons side="right">
-    <button class="button button-icon icon ion-gear-b" ng-click="popover.show($event)"></button>
-</ion-nav-buttons>
+
 
 <ion-view title="Trace">
+    <ion-nav-buttons side="right">
+        <button class="button button-icon icon ion-gear-b" ng-click="popover.show($event)"></button>
+    </ion-nav-buttons>
   <ion-content class="has-header">
+      <!--This div, #traceWindow in this case, gets grabbed by d3 plotting features-->
       <div id="traceWindow"></div>
-      <!--<br>-->
-      <!--<button ng-click="turnOn()">Turn Data On</button>-->
   </ion-content>
 </ion-view>
 
-<script id="trace-settings.html" type="text/ng-template">
+<script id="plot-settings.html" type="text/ng-template">
   <ion-popover-view>
     <ion-header-bar>
-      <h1 class="title">Trace Settings</h1>
+      <h1 class="title">Plot Settings</h1>
     </ion-header-bar>
     <ion-content>
-      Hello!
+      <div class="item item-divider"> 
+        <center># Channels</center>
+      </div>
+      <p>&nbsp&nbsp&nbsp
+        <label ng-repeat="item in channelList">
+            <input type="radio" name="temp" ng-change="onChange()" ng-model="data.nChannels" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
+        </label>
+      </p>
+      <select>
+        <option ng-repeat="item in channelList" name="temp" ng-change="onChange()" ng-model="data.nChannels" ng-value="item.value">{{item.text}}
+        </option>
+      </select>
     </ion-content>
   </ion-popover-view>
 </script>
