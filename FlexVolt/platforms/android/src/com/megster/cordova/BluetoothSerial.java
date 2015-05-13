@@ -17,8 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -32,15 +30,13 @@ public class BluetoothSerial extends CordovaPlugin {
     private static final String CONNECT_INSECURE = "connectInsecure";
     private static final String DISCONNECT = "disconnect";
     private static final String WRITE = "write";
-    private static final String WRITE_BUFFER = "writeBuffer";
     private static final String AVAILABLE = "available";
-    private static final String AVAILABLE_BYTES = "available";
     private static final String READ = "read";
-    private static final String READ_BUFFER = "readBuffer";
-    private static final String READ_BUFFER_N_BYTES = "readBufferNBytes";
     private static final String READ_UNTIL = "readUntil";
     private static final String SUBSCRIBE = "subscribe";
     private static final String UNSUBSCRIBE = "unsubscribe";
+    private static final String SUBSCRIBE_RAW = "subscribeRaw";
+    private static final String UNSUBSCRIBE_RAW = "unsubscribeRaw";
     private static final String IS_ENABLED = "isEnabled";
     private static final String IS_CONNECTED = "isConnected";
     private static final String CLEAR = "clear";
@@ -48,6 +44,7 @@ public class BluetoothSerial extends CordovaPlugin {
     // callbacks
     private CallbackContext connectCallback;
     private CallbackContext dataAvailableCallback;
+    private CallbackContext rawDataAvailableCallback;
 
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothSerialService bluetoothSerialService;
@@ -62,13 +59,13 @@ public class BluetoothSerial extends CordovaPlugin {
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_NAME = 4;
     public static final int MESSAGE_TOAST = 5;
+    public static final int MESSAGE_READ_RAW = 6;
 
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
 
     StringBuffer buffer = new StringBuffer();
-    private List<Byte> byteBuffer = new ArrayList<Byte>();
     private String delimiter;
 
     @Override
@@ -109,12 +106,6 @@ public class BluetoothSerial extends CordovaPlugin {
 
         } else if (action.equals(WRITE)) {
 
-            String data = args.getString(0);
-            bluetoothSerialService.write(data.getBytes());
-            callbackContext.success();
-
-        } else if (action.equals(WRITE_BUFFER)) {
-
             byte[] data = args.getArrayBuffer(0);
             bluetoothSerialService.write(data);
             callbackContext.success();
@@ -123,22 +114,9 @@ public class BluetoothSerial extends CordovaPlugin {
 
             callbackContext.success(available());
 
-        } else if (action.equals(AVAILABLE_BYTES)) {
-
-            callbackContext.success(availableBytes());
-
         } else if (action.equals(READ)) {
 
             callbackContext.success(read());
-
-        } else if (action.equals(READ_BUFFER)) {
-
-            callbackContext.success(readBuffer());
-
-        } else if (action.equals(READ_BUFFER_N_BYTES)) {
-
-            int nBytes = args.getInt(0);
-            callbackContext.success(readBufferNBytes(nBytes));
 
         } else if (action.equals(READ_UNTIL)) {
 
@@ -158,6 +136,20 @@ public class BluetoothSerial extends CordovaPlugin {
 
             delimiter = null;
             dataAvailableCallback = null;
+
+            callbackContext.success();
+
+        } else if (action.equals(SUBSCRIBE_RAW)) {
+
+            rawDataAvailableCallback = callbackContext;
+
+            PluginResult result = new PluginResult(PluginResult.Status.NO_RESULT);
+            result.setKeepCallback(true);
+            callbackContext.sendPluginResult(result);
+
+        } else if (action.equals(UNSUBSCRIBE_RAW)) {
+
+            rawDataAvailableCallback = null;
 
             callbackContext.success();
 
@@ -241,17 +233,17 @@ public class BluetoothSerial extends CordovaPlugin {
          public void handleMessage(Message msg) {
              switch (msg.what) {
                  case MESSAGE_READ:
-                    byte[] bytes = (byte[]) msg.obj;
-                    for(int i = 0; i < bytes.length; i++) {
-                        byteBuffer.add(bytes[i]);
-                    }
-                    String dataString = new String(bytes, 0, bytes.length);
-
-                    // buffer.append((String)msg.obj);
-                    buffer.append(dataString);
+                    buffer.append((String)msg.obj);
 
                     if (dataAvailableCallback != null) {
                         sendDataToSubscriber();
+                    }
+
+                    break;
+                 case MESSAGE_READ_RAW:
+                    if (rawDataAvailableCallback != null) {
+                        byte[] bytes = (byte[]) msg.obj;
+                        sendRawDataToSubscriber(bytes);
                     }
                     break;
                  case MESSAGE_STATE_CHANGE:
@@ -304,6 +296,14 @@ public class BluetoothSerial extends CordovaPlugin {
         }
     }
 
+    private void sendRawDataToSubscriber(byte[] data) {
+        if (data != null && data.length > 0) {
+            PluginResult result = new PluginResult(PluginResult.Status.OK, data);
+            result.setKeepCallback(true);
+            rawDataAvailableCallback.sendPluginResult(result);
+        }
+    }
+
     private void sendDataToSubscriber() {
         String data = readUntil(delimiter);
         if (data != null && data.length() > 0) {
@@ -318,46 +318,12 @@ public class BluetoothSerial extends CordovaPlugin {
     private int available() {
         return buffer.length();
     }
-    
-    private int availableBytes() {
-        return byteBuffer.size();
-    }
-    
+
     private String read() {
         int length = buffer.length();
         String data = buffer.substring(0, length);
         buffer.delete(0, length);
-        byteBuffer.clear(); // BPF added to avoid overflow
         return data;
-    }
-
-    private byte[] readBuffer() {
-        Byte[] byteObjects = byteBuffer.toArray(new Byte[byteBuffer.size()]);
-        byte[] bytes = new byte[byteObjects.length];
-        int j=0;
-        // Unboxing byte values. (Byte[] to byte[])
-        for(Byte b: byteObjects)
-            bytes[j++] = b.byteValue();
-
-        byteBuffer.clear();
-        buffer.delete(0, buffer.length()); // BPF added to avoid ofverflow
-        return bytes;
-    }
-    
-    private byte[] readBufferNBytes(int n) {
-        List<Byte> subList = byteBuffer.subList(0,n);
-        Byte[] byteObjects = subList.toArray(new Byte[subList.size()]);
-        byte[] bytes = new byte[byteObjects.length];
-        int j=0;
-        // Unboxing byte values. (Byte[] to byte[])
-        for(Byte b: byteObjects)
-            bytes[j++] = b.byteValue();
-
-        for (int i = 0; i < n; i ++){
-            byteBuffer.remove(i);
-        }
-        buffer.delete(0, n); // BPF added to avoid ofverflow
-        return bytes;
     }
 
     private String readUntil(String c) {

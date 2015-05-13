@@ -8,6 +8,7 @@
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/ant-build/classes/com/megster/cordova/BluetoothSerialService$ConnectedThread.class \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/ant-build/classes/com/megster/cordova/BluetoothSerialService$ConnectThread.class \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/ant-build/classes/com/megster/cordova/BluetoothSerialService.class \
+/Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/ant-build/classes/com/verso/cordova/clipboard/Clipboard.class \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/ant-build/classes/org/apache/cordova/api/Dummy.class \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/ant-build/classes/org/apache/cordova/device/Device.class \
 /Users/brendan_p_flynn/Dropbox/NetBeans/Projects/FlexVoltViewer_Ionic/FlexVolt/platforms/android/ant-build/classes/org/flexvolt/BuildConfig.class \
