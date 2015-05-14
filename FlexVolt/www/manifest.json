@@ -1,0 +1,21 @@
+{
+    "name": "FlexVolt Viewer",
+    "description": "Alpha Release",
+    "version": "0.0.4",
+    "manifest_version": 2,
+    "permissions": [
+        "serial",
+        "storage"
+    ],
+    "icons": {
+        "48": "img/fv_ic_main_48.png",
+        "128": "img/fv_ic_main_128.png"
+    },
+    "app": {
+        "background": {
+            "scripts": [
+                "background.js"
+            ]
+        }
+    }
+}

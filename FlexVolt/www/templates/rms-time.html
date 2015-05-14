@@ -1,0 +1,104 @@
+
+
+<ion-view title="RMS vs Time">
+    <ion-nav-buttons side="left">
+        <help-popover></help-popover>
+    </ion-nav-buttons>
+    <ion-nav-buttons side="right">
+        <connection-status></connection-status>
+        <filters-popover ng-if="!mobile"></filters-popover>
+        <settings-popover></settings-popover>
+    </ion-nav-buttons>
+  <ion-content scroll="false" class="has-header" style="background-color: grey">
+      <!--This div, #traceWindow in this case, gets grabbed by d3 plotting features-->
+      <div ng-if="!demo && flexvolt.api.connection.state !== 'connected'">
+          <div>FlexVolt connection status: {{flexvolt.getDetailedConnectionStatus()}}</div>
+          <div>If you are having trouble connecting, check connection settings, or try Demos to see what this task would do.</div>
+      </div>
+      <div id="rmsTimeWindow"></div>
+      <div style="text-align:center">
+          Amplitude Stats (15 Second Window)
+      </div>
+      <div class="row">
+          <div class="col">Min: {{metrics.minAmplitude | number:2}}</div>
+          <div class="col">Mean: {{metrics.meanAmplitude | number:2}}</div>
+          <div class="col">Max: {{metrics.maxAmplitude | number:2}}</div>
+      </div>
+  </ion-content>
+</ion-view>
+
+<script id="rms-time-settings.html" type="text/ng-template">
+  <ion-popover-view>
+    <ion-header-bar>
+      <h1 class="title">Plot Settings</h1>
+    </ion-header-bar>
+    <ion-content>
+        <form name="setForm">
+            <div style="padding: 8px 8px">
+              <div class="item item-divider"> 
+                <center># Channels Radio</center>
+              </div>
+              <p>&nbsp&nbsp&nbsp
+                <label ng-repeat="item in channelList">
+                    <input type="radio" ng-model="settings.nChannels" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
+                </label>
+              </p>
+              <div class="item item-divider"> 
+                <center>Zoom Options</center>
+              </div>
+              <p>&nbsp&nbsp&nbsp
+                <label ng-repeat="item in zoomList">
+                    <input type="radio" ng-model="settings.zoomOption" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
+                </label>
+              </p>
+      
+              <div ng-if="mobile">
+                <center class="item item-divider">RMS Window Size: {{settings.windowSize}}</center>
+                20<input type="range" integer min="20" max="100" ng-model="settings.windowSize" ng-change="onChange()" numericbinding style="vertical-align:middle">500<br/>
+              </div>
+      
+              <dft-settings ng-if="mobile"></dft-settings>
+            </div>
+        </form>
+    </ion-content>
+  </ion-popover-view>
+</script>
+
+<script id="rms-time-filters.html" type="text/ng-template">
+  <ion-popover-view>
+    <ion-header-bar>
+      <h1 class="title">Filter Settings</h1>
+    </ion-header-bar>
+    <ion-content>
+        <form name="setForm">
+            <div style="padding: 8px 8px">
+              
+              <div>
+                <center class="item item-divider">RMS Window Size: {{settings.windowSize}}</center>
+                20<input type="range" min="20" max="100" ng-model="settings.windowSize" ng-change="onChange()" numericbinding style="vertical-align:middle">500<br/>
+              </div>
+      
+              <dft-settings></dft-settings>
+            </div>
+        </form>
+    </ion-content>
+  </ion-popover-view>
+</script>
+
+<script id="rms-time-help.html" type="text/ng-template">
+  <!--<ion-popover-view style="width: 250px; height: 300px;">-->
+  <ion-popover-view>
+    <ion-header-bar>
+      <h1 class="title">Trace Help</h1>
+    </ion-header-bar>
+    <ion-content>
+        <div>
+            Plots the RMS (root mean square) of real-time data.
+            Change how many data samples go into each RMS calculation by adjusting the RMS window size in settings.
+            You can also zoom and pan!
+        </div>
+    </ion-content>
+  </ion-popover-view>
+</script>
+
+

@@ -1,6 +1,6 @@
 
 
-<ion-view title="Myometer">
+<ion-view title="Snake">
     <ion-nav-buttons side="left">
         <help-popover></help-popover>
     </ion-nav-buttons>
@@ -8,40 +8,40 @@
         <connection-status></connection-status>
         <settings-popover></settings-popover>
     </ion-nav-buttons>
-  <ion-content class="has-header">
-    <div ng-if="!demo && flexvolt.api.connection.state !== 'connected'">
+    <ion-content class="has-header">
+      <div ng-if="!demo && flexvolt.api.connection.state !== 'connected'">
           <div>FlexVolt connection status: {{flexvolt.getDetailedConnectionStatus()}}</div>
           <div>If you are having trouble connecting, check connection settings, or try Demos to see what this task would do.</div>
-    </div>
-    <div id="myometerWindow"></div>
+      </div>
+    <div id="snakeWindow"></div>
     <div style="padding: 5px 25px">
-        <h3>Myometer</h3>
+        <h3>Snake Game</h3>
         <p>This task is still under construction.  The goals for this task:</p>
         <ul>
-            <li>1.  Provide a fun and simple display of muscle signal intensity.</li>
-            <li>2.  Include user inputs for threshold, saving high scores, reseting.</li>
-            <li>3.  Monitor signals, displaying live intensity as well as maximum achieved.</li>
+            <li>1.  Snake - the game where you direct a snake around a board with left/right commands.</li>
+            <li>2.  In this case, those commands will come from muscle signals, based on thresholds.</li>
+            <li>3.  Game display, game engine, user inputs for channels and thresholds.</li>
         </ul>
     </div>
   </ion-content>
 </ion-view>
 
-<script id="myometer-settings.html" type="text/ng-template">
+<script id="snake-settings.html" type="text/ng-template">
   <ion-popover-view>
     <ion-header-bar>
-      <h1 class="title">Myometer Settings</h1>
+      <h1 class="title">Game Settings</h1>
     </ion-header-bar>
     <ion-content>
-      None Yet!
+      No Snake Settings Yet!
     </ion-content>
   </ion-popover-view>
 </script>
 
-<script id="myometer-help.html" type="text/ng-template">
+<script id="snake-help.html" type="text/ng-template">
   <!--<ion-popover-view style="width: 250px; height: 300px;">-->
   <ion-popover-view>
     <ion-header-bar>
-      <h1 class="title">Myometer Help</h1>
+      <h1 class="title">Snake Help</h1>
     </ion-header-bar>
     <ion-content>
         <div>
