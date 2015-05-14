@@ -1,2 +1,18 @@
-FlexVolt/nbproject/private/
-FlexVolt/platforms/
+# IDE-dependent directories
+ FlexVolt/nbproject/
+ 
+ # Build platforms
+ FlexVolt/platforms/
+ 
+ # keys
+ *.pem
+ *.keystore
+ 
+ # Builds
+ *.crx
+ *.zip
+ *.apk
+ *.ap_
+ 
+ # Log files
+ *.log
