@@ -16,3 +16,18 @@
  
  # Log files
  *.log
+
+ FlexVolt/nbproject/
+ FlexVolt/platforms/
+ FlexVolt/www.crx
+ FlexVolt/www.pem
+ FlexVoltViewer-0_0_1.apk
+ FlexVoltViewer-0_0_1.zip
+ FlexVoltViewer-0_0_2.apk
+ FlexVoltViewer-0_0_2.zip
+ FlexVoltViewer-0_0_3.apk
+ FlexVoltViewer-0_0_3.zip
+ FlexVoltViewer-0_0_4.apk
+ FlexVoltViewer-0_0_4.zip
+ FlexVoltViewer.crx
+ fv-release-key.keystore
