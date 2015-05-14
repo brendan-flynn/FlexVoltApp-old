@@ -16,6 +16,7 @@
     BLE *_bleShield;
     NSString* _connectCallbackId;
     NSString* _subscribeCallbackId;
+    NSString* _subscribeBytesCallbackId;
     NSString* _rssiCallbackId;
     NSMutableString *_buffer;
     NSString *_delimiter;
@@ -25,6 +26,9 @@
 - (void)disconnect:(CDVInvokedUrlCommand *)command;
 
 - (void)subscribe:(CDVInvokedUrlCommand *)command;
+- (void)unsubscribe:(CDVInvokedUrlCommand *)command;
+- (void)subscribeRaw:(CDVInvokedUrlCommand *)command;
+- (void)unsubscribeRaw:(CDVInvokedUrlCommand *)command;
 - (void)write:(CDVInvokedUrlCommand *)command;
 
 - (void)list:(CDVInvokedUrlCommand *)command;

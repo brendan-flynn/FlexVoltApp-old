@@ -15,6 +15,10 @@
                         {
                             "xml": "<feature name=\"Device\"><param name=\"android-package\" value=\"org.apache.cordova.device.Device\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Clipboard\"><param name=\"android-package\" value=\"com.verso.cordova.clipboard.Clipboard\" /></feature>",
+                            "count": 1
                         }
                     ],
                     "/widget": [
@@ -36,7 +40,8 @@
                             "xml": "<uses-permission android:name=\"android.permission.BLUETOOTH_ADMIN\" />",
                             "count": 1
                         }
-                    ]
+                    ],
+                    "/manifest/application": []
                 }
             }
         }
@@ -52,6 +57,9 @@
             "PACKAGE_NAME": "org.flexvolt"
         },
         "org.apache.cordova.device": {
+            "PACKAGE_NAME": "org.flexvolt"
+        },
+        "com.verso.cordova.clipboard": {
             "PACKAGE_NAME": "org.flexvolt"
         }
     },
