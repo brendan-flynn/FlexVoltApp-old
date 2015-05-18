@@ -39,6 +39,19 @@
                 </div>
                 <select ng-change="onChange()" ng-model="settings.nChannels" ng-options="opt.value as opt.text for opt in channelList"></select>
                 
+                <div class="item item-divider"> 
+                    <center>Gain Radio</center>
+                </div>
+                <p>&nbsp&nbsp&nbsp
+                    <label ng-repeat="item in gainList">
+                        <input type="radio" ng-model="settings.gain" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
+                    </label>
+                </p>
+                <div class="item item-divider"> 
+                    <center>Gain Dropdown</center>
+                </div>
+                <select ng-change="onChange()" ng-model="settings.gain" ng-options="opt.value as opt.text for opt in gainList"></select>
+                
                 <dft-settings ng-if="mobile"></dft-settings>
 
             </div>

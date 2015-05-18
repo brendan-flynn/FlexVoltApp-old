@@ -24,7 +24,7 @@ angular.module('flexvolt.dsp', [])
             rmsfilter: rmsfilter
         };
         
-        var nChannels = 1; // default
+        var nChannels = 1, gain = 1; // default
         var filter, filterSettings, dftSettings, dftFlag = false;
         var metricsArr, metricsFlag = false, metricsNPoints = 500;
         var demoVals = {
@@ -49,7 +49,7 @@ angular.module('flexvolt.dsp', [])
         };
 
         // Demo simulation data
-        function generateData() {
+        function generateData(G) {
             var gen = [];
             var tmp = new Date();
             var tmpTime = tmp.getTime();
@@ -63,7 +63,7 @@ angular.module('flexvolt.dsp', [])
                     if (i === 0){
                         gen[ch] = [];
                     }
-                    gen[ch][i] = demoVals.amplitudes[ch]*Math.sin(demoVals.time*2*Math.PI*demoVals.frequencies[ch]);
+                    gen[ch][i] = G*demoVals.amplitudes[ch]*Math.sin(demoVals.time*2*Math.PI*demoVals.frequencies[ch]);
                     //gen[ch][i] += demoVals.randAmplitude*2*(Math.random()-0.5); // random noise
                 }
             }
@@ -71,11 +71,12 @@ angular.module('flexvolt.dsp', [])
         }
         
         // Handles changes to settings in real time
-        api.init = function(nChan){
+        api.init = function(nChan, gain_){
             var tmp = new Date();
             demoVals.startTime = tmp.getTime();  // only needed for demo simulation
             demoVals.fs = flexvolt.api.settings.userFrequency;
             nChannels = nChan;  // have a default of 1
+            gain = gain_;
             
             // clear all filters (otherwise filters get carried between pages!
             api.rmDftFilter();
@@ -141,9 +142,9 @@ angular.module('flexvolt.dsp', [])
             // Get Data (real or simulated)
             if ($stateParams.demo){
                 // simulate data
-                parsedData = generateData(); 
+                parsedData = generateData(gain); 
             } else {
-                parsedData = flexvolt.api.getDataParsed();
+                parsedData = flexvolt.api.getDataParsed(gain);
             }
             
             // Make this faster by only processing nChannels

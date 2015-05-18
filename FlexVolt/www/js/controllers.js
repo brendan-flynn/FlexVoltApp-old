@@ -373,7 +373,7 @@
         addPopover($ionicPopover, $scope, 'helpover','trace-help.html');
         
         function init() {
-            dataHandler.init($scope.settings.nChannels);
+            dataHandler.init($scope.settings.nChannels, $scope.settings.gain);
             dataHandler.setDftFilter($scope.settings.fsFilter);
 //            dataHandler.setMetrics(60);
             tracePlot.init('#traceWindow',$scope.settings.nChannels);
@@ -381,6 +381,7 @@
 
         $scope.channelList = traceLogic.channelList;
         $scope.filterTypes = traceLogic.filterTypes;
+        $scope.gainList = traceLogic.gainList;
         $scope.settings = traceLogic.settings;
         $scope.updating = false;
 
@@ -548,10 +549,6 @@
         paintStep();
     }])
 
-    .controller('HelpCtrl', ['$scope', '$state', function($scope, $state) {
-        console.log('currentUrl = '+$state.current.url);
-    }])
-
     .controller('SettingsCtrl', 
     ['$scope','$state','$timeout','$ionicModal','$ionicPopover','$ionicPopup','$http','flexvolt','appLogic',
     function($scope, $state, $timeout, $ionicModal, $ionicPopover, $ionicPopup, $http, flexvolt, appLogic) {
@@ -569,7 +566,7 @@
             name : '',
             email : '',
             comment : ''
-        }
+        };
         
 
         $scope.updatePorts = function(){
@@ -592,8 +589,15 @@
             var month = d.getMonth()+1;
             if (month < 10) {month = '0'+month;};
             var date = d.getFullYear() + '-' + month + '-' + d.getDate();
-            console.log('Name: '+$scope.bugReportFields.name);
-             
+            
+            var cleanName = $scope.bugReportFields.name.replace(/[^a-z0-9.!]/gi, '');
+            var cleanEmail = $scope.bugReportFields.email.replace(/[^a-z0-9.!]/gi, '');
+            var cleanComment = $scope.bugReportFields.comment.replace(/[^a-z0-9.!]/gi, '');
+            
+            console.log('Name: '+$scope.bugReportFields.name+', cleanName: '+cleanName);
+            console.log('Email: '+$scope.bugReportFields.name+', cleanEmail: '+cleanName);
+            console.log('Comment: '+$scope.bugReportFields.name+', cleanComment: '+cleanName);
+            
             var data = {
                 date: date,
                 time: d.toTimeString().slice(0,8),
@@ -603,9 +607,9 @@
                 fvmodel: flexvolt.api.connection.modelNumber !== angular.undefined?flexvolt.api.connection.modelNumber:0,
                 fvserial: flexvolt.api.connection.serialNumber !== angular.undefined?flexvolt.api.connection.serialNumber:0,
                 fvversion: flexvolt.api.connection.version !== angular.undefined?flexvolt.api.connection.version:0,
-                name: $scope.bugReportFields.name,
-                email: $scope.bugReportFields.email,
-                comment: $scope.bugReportFields.comment
+                name: cleanName,
+                email: cleanEmail,
+                comment: cleanComment
             };
             
             //window.data = data;
@@ -741,12 +745,12 @@
 //        $scope.emailTaskFeedback = 'mailto:software@flexvoltbiosensor.com?subject=inApp%20Task%20Feedback';
         
         // send email to software, with subject 'inApp Task Feedback'
-        $scope.sendEmail = function(){
-            var cr = '%0D%0A';
-            var bodyStart = 'Task Name: '+cr+'Feedback:'+cr+cr+'OR'+cr+cr+'New task request:';
-            var emailTaskFeedback = 'mailto:software@flexvoltbiosensor.com?subject=inApp%20Task%20Feedback&body='+bodyStart;
-            window.open(emailTaskFeedback);
-        };
+//        $scope.sendEmail = function(){
+//            var cr = '%0D%0A';
+//            var bodyStart = 'Task Name: '+cr+'Feedback:'+cr+cr+'OR'+cr+cr+'New task request:';
+//            var emailTaskFeedback = 'mailto:software@flexvoltbiosensor.com?subject=inApp%20Task%20Feedback&body='+bodyStart;
+//            window.open(emailTaskFeedback);
+//        };
     }])
     .controller('MainCtrl', ['$scope', 'flexvolt', 'appLogic', 'storage',
     function($scope, flexvolt, appLogic, storage) {

@@ -149,6 +149,14 @@ angular.module('flexvolt.taskLogic', [])
         {text: 'High', value: 'HIGH_PASS'},
         {text: 'Band', value: 'BAND_PASS'}
     ];
+    
+    var gainList = [
+        {text: '0.5', value: 0.5},
+        {text: '1', value: 1},
+        {text: '1.5', value: 1.5},
+        {text: '2', value: 2},
+        {text: '5', value: 5}
+    ];
 
     var settings = {
         nChannels: 2,
@@ -159,8 +167,8 @@ angular.module('flexvolt.taskLogic', [])
             f2: 100,
             atten: 60,
             trband: 5
-        }
-        
+        },
+        gain: 1
     };
     
     var tmp = storage.get('traceSettings');
@@ -181,6 +189,7 @@ angular.module('flexvolt.taskLogic', [])
     return {
         channelList: channelList,
         filterTypes: filterTypes,
+        gainList: gainList,
         settings: settings,
         updateSettings: updateSettings
     };

@@ -10,6 +10,7 @@
     'use strict';
     angular.module('flexvolt', [
         'ionic',
+        'ngSanitize',
         'flexvolt.controllers',
         'flexvolt.services',
         'flexvolt.directives',

@@ -570,7 +570,7 @@ angular.module('flexvolt.flexvolt', [])
                 });
             }  else {console.log('DEBUG: data not on');}
         }
-        function getDataParsed(nSamples){
+        function getDataParsed(nSamples,G){
             nSamples = (nSamples !== undefined)?nSamples:1;
             var dataParsed = [];
             if (!checkingForData && api.connection.state === 'connected' && api.connection.data === 'on'){
@@ -587,7 +587,7 @@ angular.module('flexvolt.flexvolt', [])
                         if (tmp === api.readParams.expectedChar){
                             //console.log('got expected Char '+tmp);
                             for (var i = 0; i < api.settings.currentSignalNumber; i++){
-                                dataParsed[i][dataInd] = dataIn[readInd++] - api.readParams.offset; // centering on 0!
+                                dataParsed[i][dataInd] = G*(dataIn[readInd++] - api.readParams.offset); // centering on 0!
                             }
                             dataInd++;
                         } else {
