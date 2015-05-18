@@ -373,6 +373,7 @@
         addPopover($ionicPopover, $scope, 'helpover','trace-help.html');
         
         function init() {
+            console.log('INFO: Settings: '+JSON.stringify($scope.settings));
             dataHandler.init($scope.settings.nChannels, $scope.settings.gain);
             dataHandler.setDftFilter($scope.settings.fsFilter);
 //            dataHandler.setMetrics(60);
@@ -391,7 +392,7 @@
             }
             afID = undefined;
             $scope.updating  = true;
-            console.log('INFO: Settings changed: '+JSON.stringify($scope.settings));
+            console.log('INFO: Settings changed');
             init();
             $scope.updating  = false;
             paintStep();
@@ -458,6 +459,7 @@
         var metricCounts = 0;
         
         function init(){
+            console.log('INFO: Settings: '+JSON.stringify($scope.settings));
             dataHandler.init($scope.settings.nChannels);
             //dataHandler.setDftFilter({filterType:'HIGH_PASS', fs: 500, f1: 5, f2: 40, atten: 40, trband: 5});
             dataHandler.setDftFilter($scope.settings.fsFilter);
@@ -490,7 +492,7 @@
             }
             afID = undefined;
             $scope.updating  = true;
-            console.log('INFO: Settings changed: '+JSON.stringify($scope.settings));
+            console.log('INFO: Settings changed');
             init();
 
             $scope.updating  = false;

@@ -570,13 +570,14 @@ angular.module('flexvolt.flexvolt', [])
                 });
             }  else {console.log('DEBUG: data not on');}
         }
-        function getDataParsed(nSamples,G){
-            nSamples = (nSamples !== undefined)?nSamples:1;
+        function getDataParsed(gain){
+            var nSamples = 1;//(nSamples !== undefined)?nSamples:1;// can remove this in future
+            gain = (gain !== undefined)?gain:1;
             var dataParsed = [];
             if (!checkingForData && api.connection.state === 'connected' && api.connection.data === 'on'){
                 checkingForData = true;
                 var dataIn = dIn.slice(0);
-                if (dataIn.length >= nSamples*api.readParams.expectedBytes){
+                if (dataIn.length >= nSamples*api.readParams.expectedBytes){ // remove nSamples in future
                     // initialize parsed data vector
                     dataParsed = new Array(api.settings.currentSignalNumber);
                     for (var i = 0; i < api.settings.currentSignalNumber; i++){ dataParsed[i]=[]; }
@@ -587,7 +588,7 @@ angular.module('flexvolt.flexvolt', [])
                         if (tmp === api.readParams.expectedChar){
                             //console.log('got expected Char '+tmp);
                             for (var i = 0; i < api.settings.currentSignalNumber; i++){
-                                dataParsed[i][dataInd] = G*(dataIn[readInd++] - api.readParams.offset); // centering on 0!
+                                dataParsed[i][dataInd] = gain*(dataIn[readInd++] - api.readParams.offset); // centering on 0!
                             }
                             dataInd++;
                         } else {
@@ -681,7 +682,7 @@ angular.module('flexvolt.flexvolt', [])
 
         init();
         // This starts it all!
-        //$timeout(discoverFlexvolts, DISCOVER_DELAY_MS);
+        $timeout(discoverFlexvolts, DISCOVER_DELAY_MS);
         
         function updateDots(){
             dots += '. ';
