@@ -145,9 +145,9 @@ angular.module('flexvolt.taskLogic', [])
     
     var filterTypes = [
         {text: 'none', value: 'NONE'},
-        {text: 'Low',  value: 'LOW_PASS'},
-        {text: 'High', value: 'HIGH_PASS'},
-        {text: 'Band', value: 'BAND_PASS'}
+        {text: 'LowPass',  value: 'LOW_PASS'},
+        {text: 'HighPass', value: 'HIGH_PASS'},
+        {text: 'BandPass', value: 'BAND_PASS'}
     ];
     
     var gainList = [
@@ -211,9 +211,9 @@ angular.module('flexvolt.taskLogic', [])
     
     var filterTypes = [
         {text: 'none', value: 'NONE'},
-        {text: 'Low',  value: 'LOW_PASS'},
-        {text: 'High', value: 'HIGH_PASS'},
-        {text: 'Band', value: 'BAND_PASS'}
+        {text: 'LowPass',  value: 'LOW_PASS'},
+        {text: 'HighPass', value: 'HIGH_PASS'},
+        {text: 'BandPass', value: 'BAND_PASS'}
     ];
 
     var settings = {

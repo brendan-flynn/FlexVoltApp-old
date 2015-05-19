@@ -50,6 +50,7 @@ angular.module('flexvolt.dsp', [])
 
         // Demo simulation data
         function generateData(G) {
+            G = (G !== angular.undefined)?G:1;
             var gen = [];
             var tmp = new Date();
             var tmpTime = tmp.getTime();
@@ -166,8 +167,6 @@ angular.module('flexvolt.dsp', [])
             }
             
             
-            
-            
             return parsedData;
         };
 
@@ -245,7 +244,7 @@ angular.module('flexvolt.dsp', [])
           windowSize = dLength;
           nReturned = dLength;
       } else {nReturned = windowSize;}
-
+     
       while (dataParsed[0] !== angular.undefined && dataParsed[0].length >= windowSize){
           var dataRMS = [];
           for (var ch in dataParsed){

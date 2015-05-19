@@ -302,13 +302,22 @@ angular.module('flexvolt.flexvolt', [])
                 }
             });
             
-            if (api.preferredPortList.length > 0){
-                console.log('Preferred port list:');
-                console.log(JSON.stringify(api.preferredPortList));
-            } else {console.log('No preferred ports found');}
-            
             // make tmp portlist 
             api.tryList = api.portList.slice(0);
+            
+            // move preferred ports to the front
+            if (api.preferredPortList.length > 0){
+                console.log('Preferred port list:'+JSON.stringify(api.preferredPortList));
+                for (var i = 0; i < api.preferredPortList.length; i++){
+                    api.tryList.splice(api.tryList.indexOf(api.preferredPortList[i]),1);
+                    api.tryList.splice(api.tryList.length,0,api.preferredPortList[i]);
+                }
+                console.log('Updated tryList: '+JSON.stringify(api.tryList));
+            } else {console.log('No preferred ports found');}
+            
+            
+            
+            
             // pass it to a function that will try each port
             tryPorts();
             
