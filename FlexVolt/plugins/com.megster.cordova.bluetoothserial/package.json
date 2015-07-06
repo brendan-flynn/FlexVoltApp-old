@@ -1,5 +1,5 @@
 {
-    "version": "0.3.5",
+    "version": "0.4.3",
     "name": "com.megster.cordova.bluetoothserial",
     "cordova_name": "Bluetooth Serial",
     "description": "Bluetooth Serial Communication Plugin",
@@ -8,12 +8,13 @@
     "issue": "https://github.com/don/BluetoothSerial/issues",
     "keywords": [
         "bluetooth",
-        " BLE",
-        " arduino"
+        "BLE",
+        "arduino"
     ],
     "platforms": [
         "android",
-        "ios"
+        "ios",
+        "wp8"
     ],
     "engines": [
         {

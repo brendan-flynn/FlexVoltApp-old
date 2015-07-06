@@ -71,7 +71,18 @@ module.exports = {
 
     // calls the success callback when new data is available with an ArrayBuffer
     subscribeRawData: function (success, failure) {
-        cordova.exec(success, failure, "BluetoothSerial", "subscribeRaw", []);
+
+        successWrapper = function(data) {
+            // Windows Phone flattens an array of one into a number which
+            // breaks the API. Stuff it back into an ArrayBuffer.
+            if (typeof data === 'number') {
+                var a = new Uint8Array(1);
+                a[0] = data;
+                data = a.buffer;
+            }
+            success(data);
+        }
+        cordova.exec(successWrapper, failure, "BluetoothSerial", "subscribeRaw", []);
     },
 
     // removes data subscription
@@ -87,6 +98,29 @@ module.exports = {
     // reads the RSSI of the *connected* peripherial
     readRSSI: function (success, failure) {
         cordova.exec(success, failure, "BluetoothSerial", "readRSSI", []);
+    },
+
+    showBluetoothSettings: function (success, failure) {
+        cordova.exec(success, failure, "BluetoothSerial", "showBluetoothSettings", []);
+    },
+
+    enable: function (success, failure) {
+        cordova.exec(success, failure, "BluetoothSerial", "enable", []);
+    },
+
+    discoverUnpaired: function (success, failure) {
+        cordova.exec(success, failure, "BluetoothSerial", "discoverUnpaired", []);        
+    },
+
+    setDeviceDiscoveredListener: function (notify) {
+        if (typeof success != 'function')
+            throw 'BluetoothSerial.setDeviceDiscoveredListener: Callback not a function'
+
+        cordova.exec(notify, null, "BluetoothSerial", "setDeviceDiscoveredListener", []);
+    },
+
+    clearDeviceDiscoveredListener: function () {
+        cordova.exec(null, null, "BluetoothSerial", "clearDeviceDiscoveredListener", []);
     }
 
 };
