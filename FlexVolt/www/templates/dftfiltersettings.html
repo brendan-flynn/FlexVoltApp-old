@@ -26,7 +26,7 @@ and open the template in the editor.
 </div>
 <div>
     <center class="item item-divider">Cut-off Frequency: {{settings.fsFilter.f2}}</center>
-    0<input type="range" integer numericbinding min="0" max="200" 
+    0<input type="range" integer numericbinding min="0" max="50" 
             ng-disabled="settings.fsFilter.filterType === 'HIGH_PASS' || settings.fsFilter.filterType === 'NONE' " 
-            ng-model="settings.fsFilter.f2" ng-change="onChange()"  style="vertical-align:middle">200<br/>
+            ng-model="settings.fsFilter.f2" ng-change="onChange()"  style="vertical-align:middle">50<br/>
 </div>

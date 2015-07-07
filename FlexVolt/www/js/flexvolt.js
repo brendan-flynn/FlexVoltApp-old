@@ -78,10 +78,10 @@ angular.module('flexvolt.flexvolt', [])
             timer0PartialCount : 0,
             timer0AdjustVal : 2,
             smoothFilterFlag : false,
-            bitDepth10 : false,
+            bitDepth10 : true,
             prescalerPic : 2,
-            smoothFilterVal : 8,
-            downSampleCount : 1,
+            smoothFilterVal : 7,
+            downSampleCount : 0,
             plugTestDelay : 0
         },
         readParams : {
@@ -117,17 +117,17 @@ angular.module('flexvolt.flexvolt', [])
             api.connection.dataOnRequested = false;
             
             // TODO grab settings from local file
-            api.settings.currentSignalNumber = 8; 
-            api.settings.userFreqIndex = 7;//6,
-            api.settings.userFrequency = 500;//500,
+            api.settings.currentSignalNumber = 4; 
+            api.settings.userFreqIndex = 8;//6,
+            api.settings.userFrequency = 1000;//500,
             api.settings.userFrequencyCustom = 0;
             api.settings.timer0PartialCount = 0;
             api.settings.timer0AdjustVal = 2;
             api.settings.smoothFilterFlag = false;
-            api.settings.bitDepth10 = false;
+            api.settings.bitDepth10 = true;
             api.settings.prescalerPic = 2;
             api.settings.smoothFilterVal = 8;
-            api.settings.downSampleCount = 1;
+            api.settings.downSampleCount = 0;
             api.settings.plugTestDelay = 0;
         }
 
@@ -416,9 +416,13 @@ angular.module('flexvolt.flexvolt', [])
             }
         }
         function updateSettings(){
-            console.log('Updating Settings');
-            api.connection.state = 'updating settings';
-            waitForInput('S',defaultWait,115,updateSettings2);
+            if (api.connection.state === 'connected'){
+                console.log('Updating Settings');
+                api.connection.state = 'updating settings';
+                waitForInput('S',defaultWait,115,updateSettings2);
+            } else {
+                console.log('Cannot Update Settings - not connected');
+            }
         }
         function updateSettings2(){
             console.log('Update Settings 2');
@@ -594,12 +598,26 @@ angular.module('flexvolt.flexvolt', [])
                     var readInd = 0, dataInd = 0;
                     while(readInd < (dataIn.length-api.readParams.expectedBytes) ){
                         var tmp = dataIn[readInd++];
+                        //console.log(tmp);
                         if (tmp === api.readParams.expectedChar){
                             //console.log('got expected Char '+tmp);
-                            for (var i = 0; i < api.settings.currentSignalNumber; i++){
-                                dataParsed[i][dataInd] = gain*(dataIn[readInd++] - api.readParams.offset); // centering on 0!
+                            if (!api.settings.bitDepth10) {
+                                for (var i = 0; i < api.settings.currentSignalNumber; i++){
+                                    dataParsed[i][dataInd] = gain*(dataIn[readInd++] - api.readParams.offset); // centering on 0!
+                                }
+                                dataInd++;
+                            } else {
+                                var tmpLow = dataIn[readInd+api.settings.currentSignalNumber];
+                                //console.log(tmpLow);
+                                for (var i = 0; i < api.settings.currentSignalNumber; i++){
+                                    dataParsed[i][dataInd] = gain*( (dataIn[readInd++]<<2) + (tmpLow & 3) - api.readParams.offset); // centering on 0!
+                                    //console.log(dataParsed[i][dataInd]);
+                                    tmpLow = tmpLow >> 2;
+                                }
+                                readInd++; // for the tmpLow read
+                                dataInd++;
                             }
-                            dataInd++;
+                                
                         } else {
                             console.log('got unexpected Char '+tmp);
                         }

@@ -16,14 +16,16 @@
     
 angular.module('flexvolt.dsp', [])
 
-.factory('dataHandler', ['flexvolt', 'rmsfilter', 'dftfilter', '$stateParams', 
-    function (flexvolt, rmsfilter, dftfilter, $stateParams) {
+.factory('dataHandler', ['flexvolt', 'rmsfilter', 'dftfilter', '$stateParams', 'storage',
+    function (flexvolt, rmsfilter, dftfilter, $stateParams, storage) {
         
         // list of possible filters
         var filterList = {
             rmsfilter: rmsfilter
         };
         
+        var recordData = false;
+        var recordedData = [];
         var nChannels = 1, gain = 1; // default
         var filter, filterSettings, dftSettings, dftFlag = false;
         var metricsArr, metricsFlag = false, metricsNPoints = 500;
@@ -45,7 +47,9 @@ angular.module('flexvolt.dsp', [])
             setMetrics: undefined,
             rmMetrics: undefined,
             getData: undefined,
-            getMetrics: undefined
+            getMetrics: undefined,
+            startRecording: undefined,
+            stopRecording: undefined
         };
 
         // Demo simulation data
@@ -166,8 +170,33 @@ angular.module('flexvolt.dsp', [])
                 parsedData = filter.apply(parsedData);
             }
             
+            if (recordData){
+                for (var i = 0; i < nChannels; i++){
+                    recordedData[i] = recordedData[i].concat(parsedData[i]);
+                }
+            }
             
             return parsedData;
+        };
+        
+        api.startRecording = function(){
+            recordedData = [];
+            for (var i = 0; i < nChannels; i++){
+                recordedData[i] = [];
+            }
+            recordData = true;
+        };
+        
+        api.stopRecording = function(){
+            recordData = false;
+            var d = new Date();
+            var name = 'recorded-data--'+d.getFullYear()+'-'
+                +(d.getMonth()+1)+'-'+d.getDate()+'--'
+                +d.getHours()+'-'+d.getMinutes()+'-'
+                +d.getSeconds();
+            var setObj = {};
+            setObj[name] = recordedData;
+            storage.set(setObj);
         };
 
         api.getMetrics = function(){

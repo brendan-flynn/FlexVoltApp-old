@@ -177,7 +177,7 @@
         .state('help', {
             url: '/help',
             templateUrl: 'templates/help.html',
-            controller: 'SettingsCtrl'
+            controller: 'ConnectionCtrl'
         })
         
         .state('intro', {
@@ -190,6 +190,12 @@
             url: '/settings',
             templateUrl: 'templates/settings.html',
             controller: 'SettingsCtrl'
+        })
+        
+        .state('connection', {
+            url: '/connection',
+            templateUrl: 'templates/connection.html',
+            controller: 'ConnectionCtrl'
         })
 
         ;

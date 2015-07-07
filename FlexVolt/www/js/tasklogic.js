@@ -14,9 +14,6 @@
 
 angular.module('flexvolt.taskLogic', [])
 
-/**
- * Abstracts the flexvolt, deals with bluetooth communications, etc.
- */
 .factory('xyLogic', ['flexvolt', 'storage', 'xyDot', function(flexvolt, storage, xyDot) {
         
     var settings = {
@@ -151,7 +148,7 @@ angular.module('flexvolt.taskLogic', [])
     ];
     
     var gainList = [
-        {text: '0.5', value: 0.5},
+        {text: '.5', value: 0.5},
         {text: '1', value: 1},
         {text: '1.5', value: 1.5},
         {text: '2', value: 2},
@@ -215,6 +212,14 @@ angular.module('flexvolt.taskLogic', [])
         {text: 'HighPass', value: 'HIGH_PASS'},
         {text: 'BandPass', value: 'BAND_PASS'}
     ];
+    
+    var gainList = [
+        {text: '.5', value: 0.5},
+        {text: '1', value: 1},
+        {text: '1.5', value: 1.5},
+        {text: '2', value: 2},
+        {text: '5', value: 5}
+    ];
 
     var settings = {
         nChannels: 1,
@@ -227,7 +232,8 @@ angular.module('flexvolt.taskLogic', [])
             f2: 100,
             atten: 60,
             trband: 5
-        }
+        },
+        gain: 1
     };
     
     var tmp = storage.get('rmsTimeSettings');
@@ -246,6 +252,7 @@ angular.module('flexvolt.taskLogic', [])
     return {
         channelList: channelList,
         settings: settings,
+        gainList: gainList,
         filterTypes: filterTypes,
         zoomList: zoomList,
         updateSettings: updateSettings
@@ -263,6 +270,54 @@ angular.module('flexvolt.taskLogic', [])
     
     
 })
+
+.factory('hardwareLogic', ['storage', function(storage) {
+    
+    var channelList = [
+        {text: '1', value: 1},
+        {text: '2', value: 2},
+        {text: '4', value: 4},
+        {text: '8', value: 8}
+    ];
+    
+    var frequencyList = [
+        {text: '500',  value: '500'},
+        {text: '1000', value: '1000'},
+        {text: '1500', value: '1500'},
+        {text: '2000', value: '2000'}
+    ];
+
+    var settings = {
+        nChannels: 2,
+        frequency: 1000,
+        bitDepth10: false,
+        smoothFilterFlag: false,
+        smoothFilterVal: 8
+    };
+    
+    var tmp = storage.get('hardwareSettings');
+    if (tmp){
+        for (var field in tmp){
+            console.log('getting field '+field);
+            settings[field] = tmp[field];
+        }
+        console.log('settings: '+JSON.stringify(settings));
+    } else {
+        console.log('DEBUG: no settings found for hardware, using defaults');
+    }
+
+    function updateSettings(){
+        storage.set({hardwareSettings:settings});
+    }
+    
+    return {
+        channelList: channelList,
+        frequencyList: frequencyList,
+        settings: settings,
+        updateSettings: updateSettings
+    };
+}])
+
 ;
 
 }());

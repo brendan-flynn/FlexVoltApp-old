@@ -170,9 +170,11 @@ angular.module('flexvolt.d3plots', [])
     var colorList = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
     var mar, margin, width, height, plotElement;
     mar = 10;
+    var headerPadding = 44;
+    var footerPadding = 50;
     margin = {top: mar, right: mar, bottom: mar, left: mar};
     width = window.innerWidth - margin.left - margin.right,
-    height = window.innerHeight - 50 - margin.top - margin.bottom;
+    height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
     var yMax = 128;
     
     var xPos = 0, startPos = 0;
@@ -259,6 +261,7 @@ angular.module('flexvolt.d3plots', [])
         svg = d3.select(element).append('svg')
             .attr('width', width + margin.left + margin.right)
             .attr('height', height + margin.top + margin.bottom)
+            .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
           
         reset();
@@ -286,15 +289,15 @@ angular.module('flexvolt.d3plots', [])
     
     api.resize = function(){
         width = window.innerWidth - margin.left - margin.right,
-        height = window.innerHeight - 50 - margin.top - margin.bottom;
+        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding
         yA = [];
         lineA = [];
         d3.select('svg').remove();
         svg = d3.select(plotElement).append('svg')
-          .attr('width', width + margin.left + margin.right)
-          .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'); 
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'); 
           
         reset();
     };

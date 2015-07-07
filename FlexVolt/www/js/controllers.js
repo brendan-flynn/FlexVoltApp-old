@@ -114,19 +114,19 @@
                         ref:"demos",
                         btnName:"Demos"
                     },
-//                    b2:{
-//                        icon:"icon ion-ios-pulse",
-//                        ref:"plot",
-//                        btnName:"test"
-//                    },
-                    b3:{
+                    b2:{
                         icon:"icon ion-help",
                         ref:"help",
                         btnName:"Help"
                     },
+                    b3:{
+                        icon:"icon ion-gear-b",
+                        ref:"settings",
+                        btnName:"Settings"
+                    },
                     b4:{
                         icon:"icon ion-settings",
-                        ref:"settings",
+                        ref:"connection",
                         btnName:"Connection"
                     }
                 }
@@ -385,6 +385,9 @@
         $scope.gainList = traceLogic.gainList;
         $scope.settings = traceLogic.settings;
         $scope.updating = false;
+        
+        $scope.startRecording = dataHandler.startRecording;
+        $scope.stopRecording = dataHandler.stopRecording;
 
         $scope.onChange = function(){
             if (afID){
@@ -460,7 +463,7 @@
         
         function init(){
             console.log('INFO: Settings: '+JSON.stringify($scope.settings));
-            dataHandler.init($scope.settings.nChannels);
+            dataHandler.init($scope.settings.nChannels, $scope.settings.gain);
             //dataHandler.setDftFilter({filterType:'HIGH_PASS', fs: 500, f1: 5, f2: 40, atten: 40, trband: 5});
             dataHandler.setDftFilter($scope.settings.fsFilter);
             dataHandler.setFilter('rmsfilter',{windowSize: $scope.settings.windowSize});
@@ -472,6 +475,7 @@
 
         $scope.demo = $stateParams.demo;
         $scope.channelList = rmsTimeLogic.channelList;
+        $scope.gainList = rmsTimeLogic.gainList;
         $scope.zoomList = rmsTimeLogic.zoomList;
         $scope.settings = rmsTimeLogic.settings;
         $scope.filterTypes = rmsTimeLogic.filterTypes;
@@ -551,7 +555,7 @@
         paintStep();
     }])
 
-    .controller('SettingsCtrl', 
+    .controller('ConnectionCtrl', 
     ['$scope','$state','$timeout','$ionicModal','$ionicPopover','$ionicPopup','$http','flexvolt','appLogic',
     function($scope, $state, $timeout, $ionicModal, $ionicPopover, $ionicPopup, $http, flexvolt, appLogic) {
         var currentUrl = $state.current.url;
@@ -583,6 +587,20 @@
             if (port !== angular.undefined){
                 flexvolt.api.manualConnect(port);
             }
+        };
+        
+        $scope.createFile = function(){
+            chrome.fileSystem.chooseEntry({type: 'saveFile', 
+                suggestedName: 'myfile.csv'}, 
+                function(writableFileEntry) {
+                    writableFileEntry.createWriter(function(writer) {
+                        writer.onwriteend = function(e) {
+                            console.log('Save complete!');
+                        };
+                        writer.write(new Blob(['test text to write'],{type: 'csv'})); 
+                }, function(e){console.log('ERROR: in file writer: '+JSON.stringify(e));});
+            });
+            
         };
         
         $scope.submitBugReport = function(){
@@ -742,6 +760,43 @@
     //        flexvolt.api.debugging.communicationsLog = '';
     //    };
     //    
+    }])
+    .controller('SettingsCtrl', 
+    ['$scope','$state','flexvolt','hardwareLogic',
+    function($scope, $state, flexvolt, hardwareLogic) {
+        var currentUrl = $state.current.url;
+        console.log('currentUrl = '+currentUrl);
+        
+        $scope.channelList = hardwareLogic.channelList;
+        $scope.frequencyList = hardwareLogic.frequencyList;
+        $scope.settings = hardwareLogic.settings;
+        
+        $scope.onChange = function(){
+            flexvolt.api.settings.nChannels = $scope.settings.nChannels;
+            flexvolt.api.settings.frequency = $scope.settings.frequency;
+            flexvolt.api.settings.bitDepth10 = $scope.settings.bitDepth10;
+            flexvolt.api.settings.smoothFilterFlag = $scope.settings.smoothFilterFlag;
+            flexvolt.api.settings.smoothFilterVal = $scope.settings.smoothFilterVal;
+            flexvolt.api.updateSettings();
+            hardwareLogic.updateSettings();
+        };
+        
+        $scope.createFile = function(){
+            chrome.fileSystem.chooseEntry({
+                    type: 'saveFile', 
+                    suggestedName: 'myfile',
+                    accepts: [{extensions: ['csv']}]
+                }, 
+                function(writableFileEntry) {
+                    writableFileEntry.createWriter(function(writer) {
+                        writer.onwriteend = function(e) {
+                            console.log('Save complete!');
+                        };
+                        writer.write(new Blob(['test text to write'],{type: 'text/plain'})); 
+                }, function(e){console.log('ERROR: in file writer: '+JSON.stringify(e));});
+            });  
+        };
+        
     }])
     .controller('IntroCtrl', ['$scope', function($scope){
 //        $scope.emailTaskFeedback = 'mailto:software@flexvoltbiosensor.com?subject=inApp%20Task%20Feedback';
