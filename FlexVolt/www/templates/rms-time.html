@@ -28,70 +28,37 @@
 </ion-view>
 
 <script id="rms-time-settings.html" type="text/ng-template">
-  <ion-popover-view>
-    <ion-header-bar>
+  <ion-popover-view style="width: 262px">
+<!--    <ion-header-bar>
       <h1 class="title">Plot Settings</h1>
-    </ion-header-bar>
+    </ion-header-bar>-->
     <ion-content>
         <form name="setForm">
             <div style="padding: 8px 8px">
-              <div class="item item-divider"> 
-                <center># Channels Radio</center>
-              </div>
+                <h3 style="text-align:center">
+                    # Channels
+                </h3>
+<!--              <div class="item item-divider"> 
+                <center># Channels</center>
+              </div>-->
               <p>&nbsp&nbsp&nbsp
-                <label ng-repeat="item in channelList">
-                    <input type="radio" ng-model="settings.nChannels" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
+                <label ng-repeat="item in hardwareLogic.channelList">
+                    <input type="radio" ng-model="rmsTimeLogic.settings.nChannels" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
                 </label>
               </p>
-              <div class="item item-divider"> 
+              <h3 style="text-align:center">
+                Zoom Options
+              </h3>
+<!--              <div class="item item-divider"> 
                 <center>Zoom Options</center>
-              </div>
+              </div>-->
               <p>&nbsp&nbsp&nbsp
-                <label ng-repeat="item in zoomList">
-                    <input type="radio" ng-model="settings.zoomOption" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
+                <label ng-repeat="item in rmsTimeLogic.zoomList">
+                    <input type="radio" ng-model="rmsTimeLogic.settings.zoomOption" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
                 </label>
               </p>
       
-              <div class="item item-divider"> 
-                    <center>Gain Radio</center>
-              </div>
-              <p>&nbsp&nbsp&nbsp
-                <label ng-repeat="item in gainList">
-                   <input type="radio" ng-model="settings.gain" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
-                </label>
-              </p>
-              <div class="item item-divider"> 
-                <center>Gain Dropdown</center>
-              </div>
-              <select ng-change="onChange()" ng-model="settings.gain" ng-options="opt.value as opt.text for opt in gainList"></select>
-      
-              <div ng-if="mobile">
-                <center class="item item-divider">RMS Window Size: {{settings.windowSize}}</center>
-                20<input type="range" integer min="20" max="100" ng-model="settings.windowSize" ng-change="onChange()" numericbinding style="vertical-align:middle">100<br/>
-              </div>
-      
-              <dft-settings ng-if="mobile"></dft-settings>
-            </div>
-        </form>
-    </ion-content>
-  </ion-popover-view>
-</script>
-
-<script id="rms-time-filters.html" type="text/ng-template">
-  <ion-popover-view>
-    <ion-header-bar>
-      <h1 class="title">Filter Settings</h1>
-    </ion-header-bar>
-    <ion-content>
-        <form name="setForm">
-            <div style="padding: 8px 8px">
-              
-              <div>
-                <center class="item item-divider">RMS Window Size: {{settings.windowSize}}</center>
-                20<input type="range" min="20" max="100" ng-model="settings.windowSize" ng-change="onChange()" numericbinding style="vertical-align:middle">100<br/>
-              </div>
-      
-              <dft-settings></dft-settings>
+              <filter-options ng-if="mobile"></filter-options>
             </div>
         </form>
     </ion-content>

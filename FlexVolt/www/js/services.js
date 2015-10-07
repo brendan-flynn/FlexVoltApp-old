@@ -123,10 +123,16 @@ angular.module('flexvolt.services', [])
                     // find and disconnect all existing connections
                     //console.log('In disconnect, connectionId: '+bluetoothPlugin.connectionId);
                     chrome.serial.getConnections( function(connectionInfos){
+                        if (chrome.runtime.lastError) {
+                            console.log('ERROR: Chrome runtime error during serial.getConnections: '+chrome.runtime.lastError.message);
+                        }
                         connectionInfos.forEach(function(con){
                             console.log('Disconnecting connectionId '+con.connectionId);
                             chrome.serial.disconnect(con.connectionId, function(){
-                                //console.log('disconnecting');
+                                if (chrome.runtime.lastError) {
+                                    console.log('ERROR: Chrome runtime error during serial.disconnect: '+chrome.runtime.lastError.message);
+                                }
+                                    //console.log('disconnecting');
                             });
                         });
                         bluetoothPlugin.connectionId = undefined;
@@ -215,55 +221,86 @@ angular.module('flexvolt.services', [])
 //    
 //    return clipboard;
 //})
-.factory('storage', ['$window', function($window) {
+.factory('storage', ['$window', '$q', function($window, $q) {
     var storage = {
         set: undefined,
         get: undefined,
+        load: undefined,
         dataStore: undefined
     };
+    
+    var backupStorage = {};
+    
+    var readyDeferred = $q.defer();
         
-    ionic.Platform.ready(function() {
-        if (window.cordova) {
-            // window.localStorage is synchronous, so we can load as needed
-            storage.set = function(obj) {
-                var key = Object.keys(obj)[0];
-                var value = obj[key].valueOf();
-                $window.localStorage[key] = JSON.stringify(value);
-            };
-            storage.get = function(key) {
-                return JSON.parse($window.localStorage[key] || false);
-            };
-            //window.storage = storage;
-        } else {
-            // chrome storage is async, which is a pain, so load all now into a copy
-            // then load from the copy as needed...
-            
-            storage.set = function(obj) {
-                chrome.storage.local.set(obj);
-                storage.load(); // just to keep them in sync
-            };
-            // pass in default object, overwrites key values if present in storage
-            storage.get = function(key) {
-                return storage.dataStore[key];
-            };
-            storage.load = function() {
-                chrome.storage.local.get(null, function(item){
-                    // only log this on initial load
-                    if (storage.dataStore === angular.undefined){
-                        storage.dataStore = item;
-                        console.log('Loaded stored settings: '+JSON.stringify(storage.dataStore));
-                    } else {
-                        storage.dataStore = item;
-                    }
-                    
+    if (window.cordova) {
+        // window.localStorage is synchronous, so we can load as needed
+        storage.set = function(obj) {
+            return readyDeferred.promise
+                .then(function(){
+                    var key = Object.keys(obj)[0];
+                    var value = obj[key].valueOf();
+                    $window.localStorage[key] = JSON.stringify(value);
                 });
-            };
-            
-            storage.load();
-            
-            //window.storage = storage;
-        }
-    });
+        };
+        storage.get = function(key) {
+            return readyDeferred.promise
+                .then(function(){
+                    return $window.localStorage.hasOwnProperty(key)? JSON.parse($window.localStorage[key]):false;
+                });
+        };
+        readyDeferred.resolve();
+        //window.storage = storage;
+    } else if (chrome && chrome.storage) {
+        // chrome storage is ASYNC, which is a pain, so load all now into a copy
+        // then load from the copy as needed...
+
+        storage.set = function(obj) {
+            return readyDeferred.promise
+                .then(function(){
+                    chrome.storage.local.set(obj);
+                    storage.load(); // just to keep them in sync
+                });
+        };
+        // pass in default object, overwrites key values if present in storage
+        storage.get = function(key) {
+            return readyDeferred.promise
+                .then(function(){return storage.dataStore[key];});
+        };
+        storage.load = function() {
+            chrome.storage.local.get(null, function(item){
+                // only log this on initial load
+                if (storage.dataStore === angular.undefined){
+                    storage.dataStore = item;
+                    readyDeferred.resolve();
+                    console.log('Loaded stored settings: '+JSON.stringify(storage.dataStore));
+                } else {
+                    storage.dataStore = item;
+                }
+
+            });
+        };
+
+        storage.load();
+
+        window.storage = storage;
+    } else {
+        storage.set = function(obj) {
+            return readyDeferred.promise
+                .then(function(){
+                    var key = Object.keys(obj)[0];
+                    var value = obj[key].valueOf();
+                    backupStorage[key] = value;
+                });
+        };
+        storage.get = function(key) {
+            return readyDeferred.promise
+                .then(function(){
+                    return backupStorage.hasOwnProperty(key)? backupStorage[key] : false;
+                });
+        };
+        readyDeferred.resolve();
+    }
     
     return storage;
 }])

@@ -20,7 +20,7 @@
         'flexvolt.taskLogic',
         'flexvolt.dsp'
     ])
-
+    
     .run(function($ionicPlatform) {
       $ionicPlatform.ready(function() {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -82,6 +82,14 @@
     //.config(function($ionicConfigProvider){
     //    $ionicConfigProvider.views.maxCache(0);
     //})
+    .config(function($provide) {
+        // Prevent Angular from sniffing for the history API
+        // since it's not supported in packaged apps.
+        $provide.decorator('$window', function($delegate) {
+            $delegate.history = false;
+            return $delegate;
+        });
+    })
     .config(function($ionicConfigProvider){
         $ionicConfigProvider.backButton.previousTitleText(false).text('');
     })

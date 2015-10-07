@@ -14,8 +14,237 @@
 
 angular.module('flexvolt.taskLogic', [])
 
-.factory('xyLogic', ['flexvolt', 'storage', 'xyDot', function(flexvolt, storage, xyDot) {
+.factory('logicOptions', [function(){
+    var api = {};
+    
+    api.filterOptions = [
+        {
+          type: 'Rectify',
+          name: 'Rectify'
+        },
+        {
+          type: 'Gain',
+          name: 'Gain',
+          params: {
+            gain: {
+              name: 'Value',
+              value: 1,
+              input: {
+                type: 'slider',
+                range: {
+                  low: 0.00,
+                  high: 5.00,
+                  step: 0.1
+                }
+              }
+            }
+          }
+        },
+        {
+          type: 'Offset',
+          name: 'Offset',
+          params: {
+            offset: {
+              name: 'Value',
+              value: 0,
+              unit: 'bits',
+              input: {
+                type: 'slider',
+                range: {
+                  low: -25,
+                  high: 25,
+                  step: 1
+                }
+              }
+            }
+          }
+        },
+        {
+          type: 'RMS',
+          name: 'RMS',
+          params: {
+            windowSize: {
+              name: 'Window Size',
+              value: 21,
+              unit: 'samples',
+              input: {
+                type: 'slider',
+                range: {
+                  low: 1,
+                  high: 101,
+                  step: 2
+                }
+              }
+            }
+          }
+        },
+        {
+          type: 'Average',
+          name: 'Average',
+          params: {
+            windowSize: {
+              name: 'Window Size',
+              value: 21,
+              unit: 'samples',
+              input: {
+                type: 'slider',
+                range: {
+                  low: 1,
+                  high: 101,
+                  step: 2
+                }
+              }
+            }
+          }
+        },
+        {
+          type: 'Velocity',
+          name: 'Velocity',
+          params: {
+            windowSize: {
+              name: 'Window Size',
+              value: 25,
+              unit: 'samples',
+              input: {
+                type: 'slider',
+                range: {
+                  low: 1,
+                  high: 101,
+                  step: 2
+                }
+              }
+            }
+          }
+        },
+        {
+          type: 'Area',
+          name: 'Area',
+          params: {
+            reducingFactor: {
+              name: 'Reducing Factor',
+              value: 25,
+              input: {
+                type: 'slider',
+                range: {
+                  low: 1,
+                  high: 101,
+                  step: 2
+                }
+              }
+            }
+          }
+        },
+        {
+          type: 'DFT',
+          name: 'Frequency - Low Pass',
+          params: {
+            f2: {
+              name: 'Cutoff Frequency',
+              value: 50,
+              unit: 'Hz',
+              input: {
+                type: 'slider',
+                range: {
+                  low: 0,
+                  high: 100,
+                  step: 1
+                }
+              }
+            },
+            fS: {
+                value: 1000
+            },
+            bandType: {
+              value: 'LOW_PASS'
+            }
+          }
+        },
+        {
+          type: 'DFT',
+          name: 'Frequency - High Pass',
+          params: {
+            f1: {
+              name: 'Cuton Frequency',
+              value: 10,
+              unit: 'Hz',
+              input: {
+                type: 'slider',
+                range: {
+                  low: 0,
+                  high: 100,
+                  step: 1
+                }
+              }
+            },
+            fS: {
+                value: 1000
+            },
+            bandType: {
+              value: 'HIGH_PASS'
+            }
+          }
+        },
+        {
+          type: 'DFT',
+          name: 'Frequency - Band Pass',
+          params: {
+            f1: {
+              name: 'Cut-On Frequency',
+              value: 5,
+              unit: 'Hz',
+              input: {
+                type: 'slider',
+                range: {
+                  low: 0,
+                  high: 100,
+                  step: 1
+                }
+              }
+            },
+            f2: {
+              name: 'Cut-Off Frequency',
+              value: 50,
+              unit: 'Hz',
+              input: {
+                type: 'slider',
+                range: {
+                  low: 0,
+                  high: 100,
+                  step: 1
+                }
+              }
+            },
+            fS: {
+                value: 1000
+            },
+            bandType: {
+              value: 'BAND_PASS'
+            }
+          }
+        }
+    ];
         
+    api.gainList = [
+        {text: '.5', value: 0.5},
+        {text: '1', value: 1},
+        {text: '1.5', value: 1.5},
+        {text: '2', value: 2},
+        {text: '5', value: 5}
+    ];
+    
+    api.zoomList = [
+        {text: "none", value: "NONE"},
+        {text: "x/y", value: "X AND Y"},
+        {text: "x only", value: "X ONLY"},
+        {text: "y only", value: "Y ONLY"}
+    ];
+    
+    return api;
+}])
+
+.factory('xyLogic', ['$q', 'flexvolt', 'storage', 'xyDot', function($q, flexvolt, storage, xyDot) {
+    
+    var deferred = $q.defer();
     var settings = {
         bounds : {
             min: 0,
@@ -37,14 +266,18 @@ angular.module('flexvolt.taskLogic', [])
         }
     };
     
-    var tmp = storage.get('xySettings');
-    if (tmp){
-        for (var field in tmp){
-            settings[field] = tmp[field];
-        }
-    } else {
-        console.log('DEBUG: no settings found for GoDot, using defaults');
-    }
+    storage.get('xySettings')
+        .then(function(tmp){
+            if (tmp){
+                for (var field in tmp){
+                    settings[field] = tmp[field];
+                }
+                console.log('DEBUG: settings: '+angular.toJson(settings));
+            } else {
+                console.log('DEBUG: no settings found for GoDot, using defaults');
+            }
+            deferred.resolve();
+        });
     
     var x = 128, y = 128;
     
@@ -128,183 +361,147 @@ angular.module('flexvolt.taskLogic', [])
     return {
         settings: settings,
         updateSettings: updateSettings,
-        updateAnimate: updateAnimate
+        updateAnimate: updateAnimate,
+        ready: function(){return deferred.promise;}
     };
 }])
-.factory('traceLogic', ['storage', function(storage) {
+.factory('traceLogic', ['$q', 'storage', 'logicOptions', function($q, storage, logicOptions) {
     
-    var channelList = [
-        {text: '1', value: 1},
-        {text: '2', value: 2},
-        {text: '4', value: 4},
-        {text: '8', value: 8}
-    ];
-    
-    var filterTypes = [
-        {text: 'none', value: 'NONE'},
-        {text: 'LowPass',  value: 'LOW_PASS'},
-        {text: 'HighPass', value: 'HIGH_PASS'},
-        {text: 'BandPass', value: 'BAND_PASS'}
-    ];
-    
-    var gainList = [
-        {text: '.5', value: 0.5},
-        {text: '1', value: 1},
-        {text: '1.5', value: 1.5},
-        {text: '2', value: 2},
-        {text: '5', value: 5}
-    ];
-
+    var deferred = $q.defer();
     var settings = {
         nChannels: 2,
-        fsFilter:{
-            filterType: 'NONE',
-            fs: 500,
-            f1: 0,
-            f2: 100,
-            atten: 60,
-            trband: 5
-        },
-        gain: 1
+        filters:[]
     };
     
-    var tmp = storage.get('traceSettings');
-    if (tmp){
-        for (var field in tmp){
-            console.log('getting field '+field);
-            settings[field] = tmp[field];
-        }
-        console.log('settings: '+JSON.stringify(settings));
-    } else {
-        console.log('DEBUG: no settings found for trace, using defaults');
-    }
+    storage.get('traceSettings')
+        .then(function(tmp){
+            if (tmp){
+                for (var field in tmp){
+                    settings[field] = tmp[field];
+                }
+                //console.log('DEBUG: settings: '+angular.toJson(settings));
+            } else {
+                //console.log('DEBUG: no settings found for trace, using defaults');
+            }
+            deferred.resolve();
+        });
 
     function updateSettings(){
         storage.set({traceSettings:settings});
     }
     
     return {
-        channelList: channelList,
-        filterTypes: filterTypes,
-        gainList: gainList,
         settings: settings,
-        updateSettings: updateSettings
+        updateSettings: updateSettings,
+        ready: function(){return deferred.promise;}
     };
 }])
-.factory('rmsTimeLogic', ['storage', function(storage) {
+.factory('rmsTimeLogic', ['$q', 'storage', 'logicOptions', function($q, storage, logicOptions) {
     
-    var channelList = [
-        {text: "1", value: 1},
-        {text: "2", value: 2},
-        {text: "4", value: 4},
-        {text: "8", value: 8}
-    ];
-    
-    var zoomList = [
-        {text: "x/y", value: 0},
-        {text: "x only", value: 1},
-        {text: "y only", value: 2}
-    ];
-    
-    var filterTypes = [
-        {text: 'none', value: 'NONE'},
-        {text: 'LowPass',  value: 'LOW_PASS'},
-        {text: 'HighPass', value: 'HIGH_PASS'},
-        {text: 'BandPass', value: 'BAND_PASS'}
-    ];
-    
-    var gainList = [
-        {text: '.5', value: 0.5},
-        {text: '1', value: 1},
-        {text: '1.5', value: 1.5},
-        {text: '2', value: 2},
-        {text: '5', value: 5}
-    ];
-
+    var deferred = $q.defer();
     var settings = {
         nChannels: 1,
-        windowSize: 10,
-        zoomOption: 0,
-        fsFilter:{
-            filterType: 'NONE',
-            fs: 500,
-            f1: 0,
-            f2: 100,
-            atten: 60,
-            trband: 5
-        },
-        gain: 1
+        zoomOption: 'NONE',
+        filters:[]
     };
     
-    var tmp = storage.get('rmsTimeSettings');
-    if (tmp){
-        for (var field in tmp){
-            settings[field] = tmp[field];
-        }
-    } else {
-        console.log('DEBUG: no settings found for RMS, using defaults');
-    }
+    storage.get('rmsTimeSettings')
+        .then(function(tmp){
+            if (tmp){
+                for (var field in tmp){
+                    settings[field] = tmp[field];
+                }
+                //console.log('DEBUG: settings: '+angular.toJson(settings));
+            } else {
+                settings.filters.push(angular.copy(logicOptions.filterOptions.filter(function(item){ return item.type === 'RMS';})[0]));
+                settings.zoomOptions = angular.copy(logicOptions.zoomOptions.filter(function(item){ return item.value === 'Y ONLY';})[0]);
+                //console.log('DEBUG: no settings found for RMS, using defaults');
+            }
+            deferred.resolve();
+        });
 
     function updateSettings(){
         storage.set({rmsTimeSettings:settings});
     }
     
     return {
-        channelList: channelList,
         settings: settings,
-        gainList: gainList,
-        filterTypes: filterTypes,
-        zoomList: zoomList,
-        updateSettings: updateSettings
+        zoomList: logicOptions.zoomList,
+        updateSettings: updateSettings,
+        ready: function(){return deferred.promise;}
     };
 }])
-.factory('snakeLogic', function() {
+.factory('snakeLogic', [function() {
     
     
-})
-.factory('ekgLogic', function() {
+}])
+.factory('ekgLogic', [function() {
     
     
-})
-.factory('hrvLogic', function() {
+}])
+.factory('hrvLogic', [function() {
     
     
-})
+}])
+
 
 .factory('hardwareLogic', ['storage', function(storage) {
+    console.log('initializing hardware settings');
     
-    var channelList = [
+    var channelList8 = [
         {text: '1', value: 1},
         {text: '2', value: 2},
         {text: '4', value: 4},
         {text: '8', value: 8}
     ];
     
+    var channelList4 = [
+        {text: '1', value: 1},
+        {text: '2', value: 2},
+        {text: '4', value: 4}
+    ];
+    
+    var channelList2 = [
+        {text: '1', value: 1},
+        {text: '2', value: 2}
+    ];
+    
+    var channelList1 = [
+        {text: '1', value: 1}
+    ];
+    
+    var channelList = channelList8;
+    
+    var availableChannelList = channelList8;
+    
     var frequencyList = [
-        {text: '500',  value: '500'},
-        {text: '1000', value: '1000'},
-        {text: '1500', value: '1500'},
-        {text: '2000', value: '2000'}
+        {text: '500',  value: 500},
+        {text: '1000', value: 1000},
+        {text: '1500', value: 1500},
+        {text: '2000', value: 2000}
     ];
 
     var settings = {
-        nChannels: 2,
+        nChannels: 4,
         frequency: 1000,
         bitDepth10: false,
         smoothFilterFlag: false,
         smoothFilterVal: 8
     };
     
-    var tmp = storage.get('hardwareSettings');
-    if (tmp){
-        for (var field in tmp){
-            console.log('getting field '+field);
-            settings[field] = tmp[field];
-        }
-        console.log('settings: '+JSON.stringify(settings));
-    } else {
-        console.log('DEBUG: no settings found for hardware, using defaults');
-    }
+    storage.get('hardwareSettings')
+        .then(function(tmp){
+            if (tmp){
+                for (var field in tmp){
+                    //console.log('getting field '+field);
+                    settings[field] = tmp[field];
+                }
+                console.log('DEBUG: settings: '+angular.toJson(settings));
+            } else {
+                console.log('DEBUG: no settings found for hardware, using defaults');
+            }
+        });
+    
 
     function updateSettings(){
         storage.set({hardwareSettings:settings});
@@ -312,6 +509,17 @@ angular.module('flexvolt.taskLogic', [])
     
     return {
         channelList: channelList,
+        availableChannelList: function(){
+            if (settings.nChannels === 1){
+                return channelList1;
+            } else if (settings.nChannels === 2){
+                return channelList2;
+            } else if (settings.nChannels === 4){
+                return channelList4;
+            } else {
+                return channelList8;
+            }
+        },
         frequencyList: frequencyList,
         settings: settings,
         updateSettings: updateSettings

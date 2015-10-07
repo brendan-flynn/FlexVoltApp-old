@@ -20,13 +20,13 @@ and open the template in the editor.
 
 <div>
     <center class="item item-divider">Cut-on Frequency: {{settings.fsFilter.f1}}</center>
-    0<input type="range" integer numericbinding min="0" max="100" 
+    0<input type="range" min="0" max="100" 
             ng-disabled="settings.fsFilter.filterType === 'LOW_PASS' || settings.fsFilter.filterType === 'NONE' " 
             ng-model="settings.fsFilter.f1" ng-change="onChange()"  style="vertical-align:middle">100<br/>
 </div>
 <div>
     <center class="item item-divider">Cut-off Frequency: {{settings.fsFilter.f2}}</center>
-    0<input type="range" integer numericbinding min="0" max="50" 
+    0<input type="range" min="0" max="50" 
             ng-disabled="settings.fsFilter.filterType === 'HIGH_PASS' || settings.fsFilter.filterType === 'NONE' " 
             ng-model="settings.fsFilter.f2" ng-change="onChange()"  style="vertical-align:middle">50<br/>
 </div>

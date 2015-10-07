@@ -193,7 +193,7 @@
             //console.log('threshMode:'+$scope.plot.thresh+', xy version:'+xyLogic.settings.plot.thresh);
             //console.log('VH:'+$scope.thresh.yH+'HH:'+$scope.thresh.xH);
             //xyLogic.updateSettings();
-            console.log('INFO: Settings changed: '+JSON.stringify($scope.settings));
+            console.log('INFO: Settings changed: '+angular.toJson($scope.settings));
         };
 
         function paintStep(timestamp){
@@ -361,33 +361,78 @@
         paintStep();
     }])
 
-    .controller('TraceCtrl', ['$stateParams', '$scope', '$state', 'flexvolt', '$ionicPopover', 'tracePlot', 'traceLogic', 'dataHandler',
-    function($stateParams, $scope, $state, flexvolt, $ionicPopover, tracePlot, traceLogic, dataHandler) {
+    .controller('TraceCtrl', ['$stateParams', '$scope', '$state', 'flexvolt', '$ionicPopover', 'tracePlot', 'traceLogic', 'dataHandler', 'hardwareLogic', 'logicOptions',
+    function($stateParams, $scope, $state, flexvolt, $ionicPopover, tracePlot, traceLogic, dataHandler, hardwareLogic) {
         var currentUrl = $state.current.url;
         console.log('currentUrl = '+currentUrl);
         $scope.demo = $stateParams.demo;
         var afID = undefined;
         
         addPopover($ionicPopover, $scope, 'popover', 'trace-settings.html',traceLogic.updateSettings);
-        addPopover($ionicPopover, $scope, 'filterpopover', 'trace-filters.html',traceLogic.updateSettings);
+        addPopover($ionicPopover, $scope, 'filterpopover', 'templates/filter-popover.html',traceLogic.updateSettings);
         addPopover($ionicPopover, $scope, 'helpover','trace-help.html');
-        
-        function init() {
-            console.log('INFO: Settings: '+JSON.stringify($scope.settings));
-            dataHandler.init($scope.settings.nChannels, $scope.settings.gain);
-            dataHandler.setDftFilter($scope.settings.fsFilter);
-//            dataHandler.setMetrics(60);
-            tracePlot.init('#traceWindow',$scope.settings.nChannels);
-        }
-
-        $scope.channelList = traceLogic.channelList;
-        $scope.filterTypes = traceLogic.filterTypes;
-        $scope.gainList = traceLogic.gainList;
-        $scope.settings = traceLogic.settings;
+                
+        $scope.pageLogic = traceLogic;
+        $scope.traceLogic = traceLogic;
+        $scope.hardwareLogic = hardwareLogic;
         $scope.updating = false;
         
-        $scope.startRecording = dataHandler.startRecording;
-        $scope.stopRecording = dataHandler.stopRecording;
+        /***********Record Control****************/
+        
+        $scope.recordControls = {
+            live: true,
+            recording: false,
+            playingBack: false,
+            recordedSignals: [
+                {
+                    name: '09:15:53',
+                    data: [1,2,3,4]
+                },
+                {
+                    name: '09:16373',
+                    data: [1,2,3,4]
+                }
+            ],
+            selectedRecord: undefined
+        };
+        
+        $scope.updateSelectedData = function(){
+          if ($scope.recordControls.selectedRecord) {
+              if ($scope.recordControls.live){
+                  $scope.toggleLive();
+              }
+          } 
+        };
+        
+        $scope.toggleLive = function(){
+            $scope.recordControls.live = !$scope.recordControls.live;
+            
+//            if ($scope.recordControls.live){
+//                flexvolt.api.turnDataOn();
+//            } else {
+//                flexvolt.api.turnDataOff();
+//            }
+        };
+        
+        $scope.toggleRecording = function(){
+            
+            $scope.recordControls.recording = !$scope.recordControls.recording;
+            if ($scope.recordControls.recording){
+                dataHandler.startRecording();
+            } else {
+                dataHandler.stopRecording();
+            }
+        };
+        $scope.togglePlayback = function(){
+            $scope.recordControls.playingBack = !$scope.recordControls.playingBack;
+            if ($scope.recordControls.playingBack){
+                
+            } else {
+                
+            }
+        };
+        
+        /**************************************/
 
         $scope.onChange = function(){
             if (afID){
@@ -402,15 +447,16 @@
         };
 
         function updateAnimate(){
-            if ($scope.updating)return;
+            if ($scope.updating)return; // don't try to draw any graphics while the settings are being changed
             
             var dataIn = dataHandler.getData();
+            //console.log(dataIn);
             if (dataIn === null || dataIn === angular.undefined || 
                 dataIn[0] === angular.undefined || dataIn[0].length === 0){return;}
             tracePlot.update(dataIn);
         }
 
-        function paintStep(timestamp){
+        function paintStep(){
             //console.log('state = '+$state.current.url);
             if ($state.current.url === currentUrl){
                 afID = window.requestAnimationFrame(paintStep);
@@ -420,18 +466,20 @@
             }
         }
         
-//        afID = paintStep($state, pageUrl)
-//        function paintStep($state_, current, updateAnimate){
-//            var afID;
-//            //console.log('state = '+$state.current.url);
-//            if ($state_.current.url === (current)){
-//                afID = window.requestAnimationFrame(paintStep);
-//                updateAnimate();
-//            } else if ($state_.current.url === '/settings'){
-//                afID = window.requestAnimationFrame(paintStep);
-//            }
-//            return afID;
-//        }
+        function init() {
+            traceLogic.ready()
+                .then(function(){
+                    traceLogic.settings.nChannels = Math.min(traceLogic.settings.nChannels,hardwareLogic.settings.nChannels);
+                    console.log('INFO: Settings: '+angular.toJson(traceLogic.settings));
+                    dataHandler.init(traceLogic.settings.nChannels);
+                    for (var i= 0; i < traceLogic.settings.filters.length; i++){
+                        dataHandler.addFilter(traceLogic.settings.filters[i]);
+                    }
+        //            dataHandler.setMetrics(60);
+                    tracePlot.init('#traceWindow',traceLogic.settings.nChannels);
+                    paintStep();
+                });
+        }
         
         window.onresize = function(){ 
             if (afID){
@@ -446,40 +494,26 @@
         };
 
         init();
-        paintStep();
     }])
 
-    .controller('RMSTimeCtrl', ['$stateParams', '$scope', '$state', 'flexvolt', '$ionicPopover', 'rmsTimePlot', 'rmsTimeLogic', 'dataHandler',
-    function($stateParams, $scope, $state, flexvolt, $ionicPopover, rmsTimePlot, rmsTimeLogic, dataHandler) {
+    .controller('RMSTimeCtrl', ['$stateParams', '$scope', '$state', 'flexvolt', '$ionicPopover', 'rmsTimePlot', 'rmsTimeLogic', 'dataHandler', 'hardwareLogic',
+    function($stateParams, $scope, $state, flexvolt, $ionicPopover, rmsTimePlot, rmsTimeLogic, dataHandler, hardwareLogic) {
         var currentUrl = $state.current.url;
         console.log('currentUrl = '+currentUrl);
         
         addPopover($ionicPopover, $scope, 'popover', 'rms-time-settings.html',rmsTimeLogic.updateSettings);
-        addPopover($ionicPopover, $scope, 'filterpopover', 'rms-time-filters.html',rmsTimeLogic.updateSettings);
+        addPopover($ionicPopover, $scope, 'filterpopover', 'templates/filter-popover.html',rmsTimeLogic.updateSettings);
         addPopover($ionicPopover, $scope, 'helpover','rms-time-help.html');
         
         var afID = undefined;
         var metricCounts = 0;
-        
-        function init(){
-            console.log('INFO: Settings: '+JSON.stringify($scope.settings));
-            dataHandler.init($scope.settings.nChannels, $scope.settings.gain);
-            //dataHandler.setDftFilter({filterType:'HIGH_PASS', fs: 500, f1: 5, f2: 40, atten: 40, trband: 5});
-            dataHandler.setDftFilter($scope.settings.fsFilter);
-            dataHandler.setFilter('rmsfilter',{windowSize: $scope.settings.windowSize});
-            dataHandler.setMetrics(60);
-            //rmsTimePlot.setN($scope.settings.nChannels);
-            rmsTimePlot.setZoomOption($scope.settings.zoomOption);
-            rmsTimePlot.init('#rmsTimeWindow', $scope.settings.nChannels, flexvolt.api.settings.userFrequency);
-        }
 
         $scope.demo = $stateParams.demo;
-        $scope.channelList = rmsTimeLogic.channelList;
-        $scope.gainList = rmsTimeLogic.gainList;
-        $scope.zoomList = rmsTimeLogic.zoomList;
-        $scope.settings = rmsTimeLogic.settings;
-        $scope.filterTypes = rmsTimeLogic.filterTypes;
-
+        
+        $scope.pageLogic = rmsTimeLogic;
+        $scope.rmsTimeLogic = rmsTimeLogic;
+        $scope.hardwareLogic = hardwareLogic;
+        
         $scope.updating = false;
         
 //        $scope.increaseWindow = function(){
@@ -513,7 +547,7 @@
             }
             
             var dataIn = dataHandler.getData();
-            
+            //console.log(dataIn);
             // animate
             if (dataIn === null || dataIn === angular.undefined || 
                 dataIn[0] === angular.undefined || dataIn[0].length === 0){return;}
@@ -538,6 +572,21 @@
             }
         }
         
+        function init(){
+            rmsTimeLogic.ready()
+                .then(function(){
+                    console.log('INFO: Settings: '+angular.toJson(rmsTimeLogic.settings));
+                    dataHandler.init(rmsTimeLogic.settings.nChannels);
+
+                    for (var i= 0; i < rmsTimeLogic.settings.filters.length; i++){
+                        dataHandler.addFilter(rmsTimeLogic.settings.filters[i]);
+                    }
+                    dataHandler.setMetrics(60);
+                    rmsTimePlot.init('#rmsTimeWindow', rmsTimeLogic.settings.nChannels, rmsTimeLogic.settings.zoomOption, hardwareLogic.settings.frequency);
+                    paintStep();
+                });
+        }
+        
         window.onresize = function(){ 
             if (afID){
               window.cancelAnimationFrame(afID);
@@ -551,8 +600,6 @@
         };
 
         init();
-
-        paintStep();
     }])
 
     .controller('ConnectionCtrl', 
@@ -598,7 +645,7 @@
                             console.log('Save complete!');
                         };
                         writer.write(new Blob(['test text to write'],{type: 'csv'})); 
-                }, function(e){console.log('ERROR: in file writer: '+JSON.stringify(e));});
+                }, function(e){console.log('ERROR: in file writer: '+angular.toJson(e));});
             });
             
         };
@@ -645,7 +692,7 @@
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'}
             })
             .success(function (response) {
-                console.log('DEBUG: bugreport response: '+JSON.stringify(response));
+                console.log('DEBUG: bugreport response: '+angular.toJson(response));
                 if (response !== angular.undefined && response.Error){
                     msg += 'Error in bug report generator.  Try again or contact software@flexvoltbiosensor.com for help.';
                 } else if (response !== angular.undefined && response.Date !== angular.undefined 
@@ -657,7 +704,7 @@
                 
             })
             .catch(function (err){
-                console.log('ERROR: Failed connection to bugreport server: '+JSON.stringify(err));
+                console.log('ERROR: Failed connection to bugreport server: '+angular.toJson(err));
                 msg += 'Bug Report Submission Failed To Connect to Server. Try again or contact software@flexvoltbiosensor.com for help.';
             })
             .finally(function(){
@@ -770,15 +817,12 @@
         $scope.channelList = hardwareLogic.channelList;
         $scope.frequencyList = hardwareLogic.frequencyList;
         $scope.settings = hardwareLogic.settings;
+        console.log('hardware settings: '+angular.toJson(hardwareLogic.settings));
         
         $scope.onChange = function(){
-            flexvolt.api.settings.nChannels = $scope.settings.nChannels;
-            flexvolt.api.settings.frequency = $scope.settings.frequency;
-            flexvolt.api.settings.bitDepth10 = $scope.settings.bitDepth10;
-            flexvolt.api.settings.smoothFilterFlag = $scope.settings.smoothFilterFlag;
-            flexvolt.api.settings.smoothFilterVal = $scope.settings.smoothFilterVal;
-            flexvolt.api.updateSettings();
+            console.log('settings now: '+angular.toJson(hardwareLogic.settings));
             hardwareLogic.updateSettings();
+            flexvolt.api.updateSettings();
         };
         
         $scope.createFile = function(){
@@ -793,7 +837,7 @@
                             console.log('Save complete!');
                         };
                         writer.write(new Blob(['test text to write'],{type: 'text/plain'})); 
-                }, function(e){console.log('ERROR: in file writer: '+JSON.stringify(e));});
+                }, function(e){console.log('ERROR: in file writer: '+angular.toJson(e));});
             });  
         };
         
@@ -809,12 +853,55 @@
 //            window.open(emailTaskFeedback);
 //        };
     }])
-    .controller('MainCtrl', ['$scope', 'flexvolt', 'appLogic', 'storage',
-    function($scope, flexvolt, appLogic, storage) {
+    .controller('filtersCtrl', ['$scope', 'logicOptions', function($scope, logicOptions){
+        /*******Filter Control*********/
+        console.log('filtersCtrl loaded with: '+angular.toJson($scope.pageLogic));
+        
+        $scope.data = {
+            state: undefined,
+            newFilter: undefined,
+            filterOptions: logicOptions.filterOptions
+        };
+
+        $scope.resetNewFilter = function(){
+            $scope.data.newFilter = {
+              type: undefined,
+              name: undefined,
+              params: undefined
+            };
+        };
+
+        $scope.addFilter = function(){
+            $scope.pageLogic.settings.filters.push(angular.copy($scope.data.newFilter));
+            console.log('added filter: '+angular.toJson($scope.data.newFilter));
+            $scope.resetNewFilter();
+            $scope.onChange();
+        };
+        
+        $scope.moveFilter = function(item, fromIndex, toIndex) {
+            $scope.pageLogic.settings.filters.splice(fromIndex, 1);
+            $scope.pageLogic.settings.filters.splice(toIndex, 0, item);
+            $scope.onChange();
+        };
+
+        $scope.onFilterDelete = function(item) {
+            $scope.pageLogic.settings.filters.splice($scope.pageLogic.settings.filters.indexOf(item), 1);
+            $scope.onChange();
+            //delete(item);
+        };
+        
+        /* ********* */
+    }])
+    .controller('MainCtrl', ['$scope', 'flexvolt', 'appLogic', 'storage', 'dataHandler', 'filters',
+    function($scope, flexvolt, appLogic, storage, dataHandler, filters) {
         // high level container for app-wide functions/variables
         $scope.mobile = false;
         $scope.flexvolt=flexvolt;
         if (window.cordova) {$scope.mobile = true;}
         console.log('mobile = '+$scope.mobile);
+        
+        window.flexvolt = flexvolt;
+        window.dataHandler = dataHandler;
+        window.filters = filters;
     }]);
 }());

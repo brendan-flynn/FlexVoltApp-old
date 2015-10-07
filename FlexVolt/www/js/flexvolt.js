@@ -29,7 +29,8 @@ angular.module('flexvolt.flexvolt', [])
 /**
  * Abstracts the flexvolt, deals with bluetooth communications, etc.
  */
-  .factory('flexvolt', ['$timeout', '$interval', 'bluetoothPlugin', function($timeout, $interval, bluetoothPlugin) {
+.factory('flexvolt', ['$timeout', '$interval', 'bluetoothPlugin', 'hardwareLogic', 
+  function($timeout, $interval, bluetoothPlugin, hardwareLogic) {
     var connectionTestInterval;
     var receivedData;
     var defaultWait = 500;
@@ -41,6 +42,8 @@ angular.module('flexvolt.flexvolt', [])
     modelList[3] = 'Bluetooth 2 Channel';
     modelList[4] = 'Bluetooth 4 Channel';
     modelList[5] = 'Bluetooth 8 Channel';
+    
+    var FREQUENCY_LIST = [1, 10, 50, 100, 200, 300, 400, 500, 1000, 1500, 2000];
     
     // api... contains the API that will be exposed via the 'flexvolt' service.
     var api = {
@@ -71,16 +74,10 @@ angular.module('flexvolt.flexvolt', [])
             communicationsLog: ''
         },
         settings: {
-            currentSignalNumber : 8, 
-            userFreqIndex : 7, //userFreqArray = {1, 10, 50, 100, 200, 300, 400, 500, 1000, 1500, 2000};
-            userFrequency : 500,
-            userFrequencyCustom : 0,
+            frequencyCustom : 0,
             timer0PartialCount : 0,
             timer0AdjustVal : 2,
-            smoothFilterFlag : false,
-            bitDepth10 : true,
             prescalerPic : 2,
-            smoothFilterVal : 7,
             downSampleCount : 0,
             plugTestDelay : 0
         },
@@ -117,16 +114,10 @@ angular.module('flexvolt.flexvolt', [])
             api.connection.dataOnRequested = false;
             
             // TODO grab settings from local file
-            api.settings.currentSignalNumber = 4; 
-            api.settings.userFreqIndex = 8;//6,
-            api.settings.userFrequency = 1000;//500,
-            api.settings.userFrequencyCustom = 0;
+            api.settings.frequencyCustom = 0;
             api.settings.timer0PartialCount = 0;
             api.settings.timer0AdjustVal = 2;
-            api.settings.smoothFilterFlag = false;
-            api.settings.bitDepth10 = true;
             api.settings.prescalerPic = 2;
-            api.settings.smoothFilterVal = 8;
             api.settings.downSampleCount = 0;
             api.settings.plugTestDelay = 0;
         }
@@ -164,7 +155,7 @@ angular.module('flexvolt.flexvolt', [])
 //                    //console.log('DEBUG: testHandshake worked');
 //                });
             } else if(api.connection.state === 'connected' && api.connection.data === 'on') {
-                console.log('DEBUG: Connected and taking data');
+                //console.log('DEBUG: Connected and taking data');
                 if (receivedData){
                     //connection still good.  reset flag
                     receivedData = false;
@@ -189,7 +180,7 @@ angular.module('flexvolt.flexvolt', [])
         // Send a command, wait for nBytes, check received bytes against inMsg, call nextFunc!
         function waitForInput(outMsg, waitTime, inMsg, nextFunc){
             if (outMsg !== null){
-                console.log('OUTPUT: '+outMsg);
+                //console.log('OUTPUT: '+outMsg);
                 write(outMsg);
             }
             
@@ -408,7 +399,7 @@ angular.module('flexvolt.flexvolt', [])
                 api.connection.serialNumber = Number((data[1]*(2^8))+data[2]);
                 api.connection.modelNumber = Number(data[3]);
                 api.connection.model = modelList[api.connection.modelNumber];
-                console.log('Version = '+api.connection.version+'. SerailNumber = '+api.connection.serialNumber+'. MODEL = '+api.connection.model+', from model# '+api.connection.modelNumber);
+                console.log('Version = '+api.connection.version+'. SerialNumber = '+api.connection.serialNumber+'. MODEL = '+api.connection.model+', from model# '+api.connection.modelNumber);
                 dIn = dIn.slice(4);
                 updateSettings();
             } else {
@@ -431,19 +422,21 @@ angular.module('flexvolt.flexvolt', [])
             var tmp = 0;
 
             //Register 1
-            if (api.settings.currentSignalNumber === 8)tmp = 3;
-            if (api.settings.currentSignalNumber === 4)tmp = 2;
-            if (api.settings.currentSignalNumber === 2)tmp = 1;
-            if (api.settings.currentSignalNumber === 1)tmp = 0;
+            if (hardwareLogic.settings.nChannels === 8)tmp = 3;
+            if (hardwareLogic.settings.nChannels === 4)tmp = 2;
+            if (hardwareLogic.settings.nChannels === 2)tmp = 1;
+            if (hardwareLogic.settings.nChannels === 1)tmp = 0;
             REGtmp = tmp << 6;
-            REGtmp += api.settings.userFreqIndex << 2;
+            
+            var frequencyIndex = FREQUENCY_LIST.indexOf(hardwareLogic.settings.frequency);
+            REGtmp += frequencyIndex << 2;
             tmp = 0;
-            if (api.settings.smoothFilterFlag) {
+            if (hardwareLogic.settings.smoothFilterFlag) {
                 tmp = 1;
             }
             REGtmp += tmp << 1;
             tmp = 0;
-            if (api.settings.bitDepth10) {
+            if (hardwareLogic.settings.bitDepth10) {
                 tmp = 1;
             }
             REGtmp += tmp;
@@ -451,15 +444,15 @@ angular.module('flexvolt.flexvolt', [])
 
             REGtmp = 0;
             REGtmp += api.settings.prescalerPic << 5;
-            REGtmp += api.settings.smoothFilterVal;
+            REGtmp += hardwareLogic.settings.smoothFilterVal;
             REG.push(REGtmp); // 01001000 72
 
-            REGtmp = api.settings.userFrequencyCustom;
+            REGtmp = api.settings.frequencyCustom;
             REGtmp = (Math.round(REGtmp >> 8)<<8);
-            REGtmp = api.settings.userFrequencyCustom-REGtmp;
+            REGtmp = api.settings.frequencyCustom-REGtmp;
             REG.push(REGtmp); // 00000000
 
-            REGtmp = api.settings.userFrequencyCustom>>8;
+            REGtmp = api.settings.frequencyCustom>>8;
             REG.push(REGtmp); // 00000000
 
             REGtmp = api.settings.timer0AdjustVal+6;
@@ -508,33 +501,33 @@ angular.module('flexvolt.flexvolt', [])
          * 75'K' = 10bits, 8ch, 11 Bytes
          */
 
-            if (!api.settings.bitDepth10){
+            if (!hardwareLogic.settings.bitDepth10){
                 api.readParams.offset = 128;
-                if (api.settings.currentSignalNumber === 1){
+                if (hardwareLogic.settings.nChannels === 1){
                     api.readParams.expectedChar = 67;
                     api.readParams.expectedBytes = 2;
-                } else if (api.settings.currentSignalNumber === 2){
+                } else if (hardwareLogic.settings.nChannels === 2){
                     api.readParams.expectedChar = 68;
                     api.readParams.expectedBytes = 3;
-                } else if (api.settings.currentSignalNumber === 4){
+                } else if (hardwareLogic.settings.nChannels === 4){
                     api.readParams.expectedChar = 69;
                     api.readParams.expectedBytes = 5;
-                } else if (api.settings.currentSignalNumber === 8){
+                } else if (hardwareLogic.settings.nChannels === 8){
                     api.readParams.expectedChar = 70;
                     api.readParams.expectedBytes = 9;
                 }
-            } else if (api.settings.bitDepth10){
+            } else if (hardwareLogic.settings.bitDepth10){
                 api.readParams.offset = 512;
-                if (api.settings.currentSignalNumber === 1){
+                if (hardwareLogic.settings.nChannels === 1){
                     api.readParams.expectedChar = 72;
                     api.readParams.expectedBytes = 3;
-                } else if (api.settings.currentSignalNumber === 2){
+                } else if (hardwareLogic.settings.nChannels === 2){
                     api.readParams.expectedChar = 73;
                     api.readParams.expectedBytes = 4;
-                } else if (api.settings.currentSignalNumber === 4){
+                } else if (hardwareLogic.settings.nChannels === 4){
                     api.readParams.expectedChar = 74;
                     api.readParams.expectedBytes = 6;
-                } else if (api.settings.currentSignalNumber === 8){
+                } else if (hardwareLogic.settings.nChannels === 8){
                     api.readParams.expectedChar = 75;
                     api.readParams.expectedBytes = 11;
                 }
@@ -592,8 +585,8 @@ angular.module('flexvolt.flexvolt', [])
                 var dataIn = dIn.slice(0);
                 if (dataIn.length >= nSamples*api.readParams.expectedBytes){ // remove nSamples in future
                     // initialize parsed data vector
-                    dataParsed = new Array(api.settings.currentSignalNumber);
-                    for (var i = 0; i < api.settings.currentSignalNumber; i++){ dataParsed[i]=[]; }
+                    dataParsed = new Array(hardwareLogic.settings.nChannels);
+                    for (var i = 0; i < hardwareLogic.settings.nChannels; i++){ dataParsed[i]=[]; }
                     // Parse channels
                     var readInd = 0, dataInd = 0;
                     while(readInd < (dataIn.length-api.readParams.expectedBytes) ){
@@ -601,15 +594,15 @@ angular.module('flexvolt.flexvolt', [])
                         //console.log(tmp);
                         if (tmp === api.readParams.expectedChar){
                             //console.log('got expected Char '+tmp);
-                            if (!api.settings.bitDepth10) {
-                                for (var i = 0; i < api.settings.currentSignalNumber; i++){
+                            if (!hardwareLogic.settings.bitDepth10) {
+                                for (var i = 0; i < hardwareLogic.settings.nChannels; i++){
                                     dataParsed[i][dataInd] = gain*(dataIn[readInd++] - api.readParams.offset); // centering on 0!
                                 }
                                 dataInd++;
                             } else {
-                                var tmpLow = dataIn[readInd+api.settings.currentSignalNumber];
+                                var tmpLow = dataIn[readInd+hardwareLogic.settings.nChannels];
                                 //console.log(tmpLow);
-                                for (var i = 0; i < api.settings.currentSignalNumber; i++){
+                                for (var i = 0; i < hardwareLogic.settings.nChannels; i++){
                                     dataParsed[i][dataInd] = gain*( (dataIn[readInd++]<<2) + (tmpLow & 3) - api.readParams.offset); // centering on 0!
                                     //console.log(dataParsed[i][dataInd]);
                                     tmpLow = tmpLow >> 2;
