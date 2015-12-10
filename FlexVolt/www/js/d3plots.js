@@ -318,7 +318,6 @@ angular.module('flexvolt.d3plots', [])
     
     return api;
 })
-
 .factory('rmsTimePlot', function() {
     var colorList = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
     var margin, width, height, plotElement, dT;
@@ -326,16 +325,16 @@ angular.module('flexvolt.d3plots', [])
     width = window.innerWidth - margin.left - margin.right,
     height = window.innerHeight - 120 - margin.top - margin.bottom;
     
-    var svg, x, y, autoY, xAxis, yAxis, zoom, line;
+    var svg, x, y, xStandard, yStandard, autoY, xAxis, yAxis, zoom, line;
     var data = [], xPos = 0, startPos = 0;
     var tmpData = [];
     
     var GAIN = 1845;
-    var xMax = 20;
+    var xMax = 4000;
     var yMax = 1000*2.5/GAIN; //mV // 130
     var factor = 1000*2.5/(GAIN*128);
     
-    var panExtent = {x: [0,width], y: [-yMax,yMax] };
+    var panExtent = {x: [0,xMax], y: [-yMax,yMax] };
 
     var api = {
       init:undefined,
@@ -352,116 +351,64 @@ angular.module('flexvolt.d3plots', [])
     var oldPan = [0,0], oldScaleX = 1, oldScaleY = 1;
     
     function zoomed() {
-//        var panX = 0, panY = 0, scaleCalc = 0;
-//        var lastScale = d3.event.scale;
-        var zoomOption = api.settings.zoomOption;
-//        console.log('zoomOption:'+zoomOption);
-//        
-//        if (zoomOption === "NONE"){
-//            console.log('none');
-//            return;
-//        }
 
-        var panL = [0, 0];
-	var scaleX = 1;
-	var scaleY = 1;
-        panL = panLimit();
-        zoom.translate(panL);
-        zoom.scale(d3.event.scale);
-        //console.log('oldpan: '+angular.toJson(oldPan)+', oldScaleX: '+oldScaleX+', oldScaleY: '+oldScaleY);
-        //console.log('pan: '+angular.toJson(panL)+', scale: '+d3.event.scale);
-        scaleX = 1; scaleY = 1;
-        
-        if (zoomOption === 'NONE'){
-            x = d3.scale.linear().domain([0, width]).range([0, width]);
-            y = d3.scale.linear().range([height, 0]);
-            if (api.settings.autoscaleY){
-                y.domain([0, autoY()]);
-            }else {
-                y.domain([-yMax, yMax]);
-            }
-            return;
-        } 
-        if (zoomOption === 'X ONLY') {
-            scaleX = d3.event.scale;
-            y = d3.scale.linear().range([height, 0]);
-            if (api.settings.autoscaleY){
-                y.domain([0, autoY()]);
-            }else {
-                y.domain([-yMax, yMax]);
-            }
-            svg.select(".x.axis").call(xAxis);
-        }  else if (!api.settings.autoscaleY){
-            if (zoomOption === 'Y ONLY'){
-                scaleY = d3.event.scale;
-                x = d3.scale.linear().domain([0, width]).range([0, width]);
-                svg.select(".y.axis").call(yAxis);
-            } else if (zoomOption === 'X AND Y') {
-                scaleX = d3.event.scale;
-                scaleY = d3.event.scale;
-                svg.select(".x.axis").call(xAxis);
-                svg.select(".y.axis").call(yAxis);
-            }
-        }
-        
-        // having trouble getting the adjustment of previously drawn lines to work.
-        // instead, just remove and redraw below
-        //scaleX = scaleX / oldScaleX;
-        //scaleY = scaleY / oldScaleY;
-//        svg.selectAll("path.line") .attr("transform","translate("+panL+")scale("+scaleX+","+scaleY+")");
-//        oldPan = panL;
-//        oldScaleX = scaleX;
-//        oldScaleY = scaleY;
-//	if (!api.settings.autoscaleY && (zoomOption === 'X AND Y'|| zoomOption === 'Y ONLY') ){
-//            svg.select(".y.axis").call(yAxis);
-//        }
-        
-        svg.selectAll('path.line').remove();
-        startPos = 0;
-        xPos = data[0].length;
-        for (var i = 0; i < api.settings.nChannels; i++){
-            svg.append('svg:path')
-                .datum(data[i])
-                .attr('class', 'line')
-                .attr('clip-path', 'url(#clip)')
-                .attr('stroke', function(d,i){ 			
-                        return colorList[i%colorList.length];
-                })
-                .attr('d', line);
-                //.attr('d', line(dataIn[i]));
-        }
-	
-//	svg.selectAll('path.line').attr('d', line);  
+      // limit pan within plot limits (avoid panning to -x values, etc.)
+      var panL = [0, 0];
+      panL = panLimit();
+      zoom.translate(panL);
+
+//         redraw existing lines at new scale
+      svg.selectAll('path.line').remove();
+      startPos = 0;
+      xPos = data[0].length;
+      for (var i = 0; i < api.settings.nChannels; i++){
+          svg.append('svg:path')
+              .datum(data[i])
+              .attr('class', 'line')
+              .attr('clip-path', 'url(#clip)')
+              .attr('stroke', function(d,i){ 			
+                      return colorList[i%colorList.length];
+              })
+              .attr('d', line);
+              //.attr('d', line(dataIn[i]));
+      }
+
+      // tried this on-liner, doesn't work yet
+//        svg.selectAll('path.line').call(line);
+
+      // update axes
+      svg.select(".x.axis").call(xAxis);
+      svg.select(".y.axis").call(yAxis);
     }
     
     function panLimit() {
 
-	var divisor = {h: height / ((y.domain()[1]-y.domain()[0])*zoom.scale()), w: width / ((x.domain()[1]-x.domain()[0])*zoom.scale())},
-		minX = -(((x.domain()[0]-x.domain()[1])*zoom.scale())+(panExtent.x[1]-(panExtent.x[1]-(width/divisor.w)))),
-		minY = -(((y.domain()[0]-y.domain()[1])*zoom.scale())+(panExtent.y[1]-(panExtent.y[1]-(height*(zoom.scale())/divisor.h))))*divisor.h,
-		maxX = -(((x.domain()[0]-x.domain()[1]))+(panExtent.x[1]-panExtent.x[0]))*divisor.w*zoom.scale(),
-		maxY = (((y.domain()[0]-y.domain()[1])*zoom.scale())+(panExtent.y[1]-panExtent.y[0]))*divisor.h*zoom.scale(); 
+      var divisor = {h: height / ((y.domain()[1]-y.domain()[0])*zoom.scale()), w: width / ((x.domain()[1]-x.domain()[0])*zoom.scale())},
+        minX = -(((x.domain()[0]-x.domain()[1])*zoom.scale())+(panExtent.x[1]-(panExtent.x[1]-(width/divisor.w)))),
+        minY = -(((y.domain()[0]-y.domain()[1])*zoom.scale())+(panExtent.y[1]-(panExtent.y[1]-(height*(zoom.scale())/divisor.h))))*divisor.h,
+        maxX = -(((x.domain()[0]-x.domain()[1]))+(panExtent.x[1]-panExtent.x[0]))*divisor.w*zoom.scale(),
+        maxY = (((y.domain()[0]-y.domain()[1])*zoom.scale())+(panExtent.y[1]-panExtent.y[0]))*divisor.h*zoom.scale(); 
 
-        var zoomOption = api.settings.zoomOption;
-        var tx = 0, ty = 0;
-        if (zoomOption === 'X AND Y'|| zoomOption === 'X ONLY'){
-            //console.log('zoom x');
-            tx = x.domain()[0] < panExtent.x[0] ? 
-                        minX : 
-                        x.domain()[1] > panExtent.x[1] ? 
-                                maxX : 
-                                zoom.translate()[0];
-        }
-        if (!api.settings.autoscaleY && (zoomOption === 'X AND Y'|| zoomOption === 'Y ONLY') ){
-            //console.log('zoom y');
-            ty = y.domain()[0]  < panExtent.y[0]? 
-                        minY : 
-                        y.domain()[1] > panExtent.y[1] ? 
-                                maxY : 
-                                zoom.translate()[1];
-        }
-	//console.log('panX: '+tx+', panY: '+ty);
-	return [tx,ty];
+      var zoomOption = api.settings.zoomOption;
+      var tx = 0, ty = 0;
+      if (zoomOption === 'X AND Y'|| zoomOption === 'X ONLY'){
+          //console.log('zoom x');
+          tx = x.domain()[0] < panExtent.x[0] ? 
+                      minX : 
+                      x.domain()[1] > panExtent.x[1] ? 
+                              maxX : 
+                              zoom.translate()[0];
+      }
+      if (!api.settings.autoscaleY && (zoomOption === 'X AND Y'|| zoomOption === 'Y ONLY') ){
+          //console.log('zoom y');
+          ty = y.domain()[0]  < panExtent.y[0]? 
+                      minY : 
+                      y.domain()[1] > panExtent.y[1] ? 
+                              maxY : 
+                              zoom.translate()[1];
+      }
+      //console.log('panX: '+tx+', panY: '+ty);
+      return [tx,ty];
 
     }
     
@@ -499,7 +446,7 @@ angular.module('flexvolt.d3plots', [])
         }
         
         x = d3.scale.linear()
-            .domain([0, width])
+            .domain([0, xMax])
             .range([0, width]);
         
         y = d3.scale.linear().range([height, 0]);
@@ -508,12 +455,29 @@ angular.module('flexvolt.d3plots', [])
         }else {
             y.domain([-yMax, yMax]);
         }
+        
+        xStandard = x;
+        yStandard = y;
     
-        zoom = d3.behavior.zoom()
-            .x(x)
-            .y(y)
-            .scaleExtent([1, 10])
-            .on('zoom', zoomed);
+        if (api.settings.zoomOption === 'NONE'){
+          zoom = function(){};
+        } else if (api.settings.zoomOption === 'X ONLY') {
+          zoom = d3.behavior.zoom()
+              .x(x)
+              .scaleExtent([1, 10])
+              .on('zoom', zoomed);
+        } else if (api.settings.zoomOption === 'Y ONLY') {
+          zoom = d3.behavior.zoom()
+              .y(y)
+              .scaleExtent([1, 10])
+              .on('zoom', zoomed);
+        } else if (api.settings.zoomOption === 'X AND Y') {
+          zoom = d3.behavior.zoom()
+              .x(x)
+              .y(y)
+              .scaleExtent([1, 10])
+              .on('zoom', zoomed);
+        }
     
         svg = d3.select(plotElement).append('svg')
             .attr('width', width + margin.left + margin.right)
@@ -591,8 +555,8 @@ angular.module('flexvolt.d3plots', [])
     function update(dataIn){
         startPos = xPos > 0?xPos-1:0;
         xPos += dataIn[0].length;
-        if (xPos >= width){
-            xPos = xPos%width;
+        if (xPos >= xMax){
+            xPos = xPos%xMax;
             startPos = 0;
             for (var ind in dataIn){
                 dataIn[ind].splice(0,dataIn[ind].length-xPos); // over ran width, splice out data up to width  

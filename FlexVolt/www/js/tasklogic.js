@@ -414,7 +414,7 @@ angular.module('flexvolt.taskLogic', [])
                 //console.log('DEBUG: settings: '+angular.toJson(settings));
             } else {
                 settings.filters.push(angular.copy(logicOptions.filterOptions.filter(function(item){ return item.type === 'RMS';})[0]));
-                settings.zoomOptions = angular.copy(logicOptions.zoomOptions.filter(function(item){ return item.value === 'Y ONLY';})[0]);
+                settings.zoomOptions = angular.copy(logicOptions.zoomList.filter(function(item){ return item.value === 'Y ONLY';})[0]);
                 //console.log('DEBUG: no settings found for RMS, using defaults');
             }
             deferred.resolve();
