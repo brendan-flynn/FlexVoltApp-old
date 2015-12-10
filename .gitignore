@@ -16,3 +16,4 @@
  
  # Log files
  **/*.log
+/FlexVolt-App/nbproject/private/
