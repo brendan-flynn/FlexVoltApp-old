@@ -402,7 +402,8 @@ angular.module('flexvolt.taskLogic', [])
     var settings = {
         nChannels: 1,
         zoomOption: 'NONE',
-        filters:[]
+        filters:[],
+        xMax: 20
     };
     
     storage.get('rmsTimeSettings')
@@ -424,9 +425,17 @@ angular.module('flexvolt.taskLogic', [])
         storage.set({rmsTimeSettings:settings});
     }
     
+    var xMaxList = [
+        {text: "1", value: "1"},
+        {text: "5", value: "5"},
+        {text: "20", value: "20"},
+        {text: "120", value: "120"}
+    ];
+    
     return {
         settings: settings,
         zoomList: logicOptions.zoomList,
+        xMaxList: xMaxList,
         updateSettings: updateSettings,
         ready: function(){return deferred.promise;}
     };

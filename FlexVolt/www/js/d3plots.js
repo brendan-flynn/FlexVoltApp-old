@@ -325,16 +325,15 @@ angular.module('flexvolt.d3plots', [])
     width = window.innerWidth - margin.left - margin.right,
     height = window.innerHeight - 120 - margin.top - margin.bottom;
     
-    var svg, x, y, xStandard, yStandard, autoY, xAxis, yAxis, zoom, line;
+    var svg, x, scaleX, y, autoY, xAxis, yAxis, zoom, line;
+    var panExtent, xMax;
     var data = [], xPos = 0, startPos = 0;
     var tmpData = [];
     
     var GAIN = 1845;
-    var xMax = 4000;
+    
     var yMax = 1000*2.5/GAIN; //mV // 130
     var factor = 1000*2.5/(GAIN*128);
-    
-    var panExtent = {x: [0,xMax], y: [-yMax,yMax] };
 
     var api = {
       init:undefined,
@@ -347,8 +346,6 @@ angular.module('flexvolt.d3plots', [])
         autoscaleY: false
       }
     };
-    
-    var oldPan = [0,0], oldScaleX = 1, oldScaleY = 1;
     
     function zoomed() {
 
@@ -376,7 +373,18 @@ angular.module('flexvolt.d3plots', [])
       // tried this on-liner, doesn't work yet
 //        svg.selectAll('path.line').call(line);
 
-      // update axes
+      // update axes - had to add some code to handle the axis ticks being in seconds, not ms
+      scaleX = d3.scale.linear()
+          .domain([x.domain()[0]*dT, x.domain()[1]*dT])
+          .range([0, width]);
+  
+      xAxis = d3.svg.axis()
+          .scale(scaleX)
+          .tickSize(-height)
+          .tickPadding(10)	
+          .tickSubdivide(true)	
+          .orient('bottom');
+
       svg.select(".x.axis").call(xAxis);
       svg.select(".y.axis").call(yAxis);
     }
@@ -449,15 +457,16 @@ angular.module('flexvolt.d3plots', [])
             .domain([0, xMax])
             .range([0, width]);
         
+        scaleX = d3.scale.linear()
+            .domain([x.domain()[0]*dT, x.domain()[1]*dT])
+            .range([0, width]);
+        
         y = d3.scale.linear().range([height, 0]);
         if (api.settings.autoscaleY){
             y.domain([0, autoY()]);
         }else {
             y.domain([-yMax, yMax]);
         }
-        
-        xStandard = x;
-        yStandard = y;
     
         if (api.settings.zoomOption === 'NONE'){
           zoom = function(){};
@@ -492,7 +501,7 @@ angular.module('flexvolt.d3plots', [])
             .y(function(d, i) { return y(factor*d); });	
     
         xAxis = d3.svg.axis()
-            .scale(x)
+            .scale(scaleX)
             .tickSize(-height)
             .tickPadding(10)	
             .tickSubdivide(true)	
@@ -529,7 +538,7 @@ angular.module('flexvolt.d3plots', [])
             .attr('class', 'axis-label')
             .attr('y', height+35)
             .attr('x', width/2)
-            .text('Time (s)');	
+            .text('Time (ms)');	
 
         // keeps the zoom frame inside the plot window!
         svg.append('clipPath')
@@ -540,8 +549,11 @@ angular.module('flexvolt.d3plots', [])
 
     }
 
-    function init(element, nChannels, newZoomOption, userFrequency){
+    function init(element, nChannels, newZoomOption, maxX, userFrequency){
         dT = 1/userFrequency;
+        xMax = maxX/dT; // seconds
+        panExtent = {x: [0,xMax], y: [-yMax,yMax] };
+    
         xPos = 0;
         startPos = 0;
         plotElement = element;

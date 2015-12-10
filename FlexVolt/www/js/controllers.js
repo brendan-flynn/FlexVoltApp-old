@@ -281,7 +281,6 @@
 
         paintStep();
     }])
-
     .controller('MyometerCtrl', ['$scope', '$state', '$ionicPopover', 'flexvolt',
     function($scope, $state, $ionicPopover, flexvolt) {
         var currentUrl = $state.current.url;
@@ -306,7 +305,6 @@
 
         paintStep();
     }])
-
     .controller('HRVCtrl', ['$scope', '$state', '$ionicPopover', 'flexvolt',
     function($scope, $state, $ionicPopover, flexvolt) {
         var currentUrl = $state.current.url;
@@ -333,7 +331,6 @@
 
         paintStep();
     }])
-    
     .controller('EKGCtrl', ['$scope', '$state', '$ionicPopover', 'flexvolt',
     function($scope, $state, $ionicPopover, flexvolt) {
         var currentUrl = $state.current.url;
@@ -360,7 +357,6 @@
 
         paintStep();
     }])
-
     .controller('TraceCtrl', ['$stateParams', '$scope', '$state', 'flexvolt', '$ionicPopover', 'tracePlot', 'traceLogic', 'dataHandler', 'hardwareLogic', 'logicOptions',
     function($stateParams, $scope, $state, flexvolt, $ionicPopover, tracePlot, traceLogic, dataHandler, hardwareLogic) {
         var currentUrl = $state.current.url;
@@ -495,7 +491,6 @@
 
         init();
     }])
-
     .controller('RMSTimeCtrl', ['$stateParams', '$scope', '$state', 'flexvolt', '$ionicPopover', 'rmsTimePlot', 'rmsTimeLogic', 'dataHandler', 'hardwareLogic',
     function($stateParams, $scope, $state, flexvolt, $ionicPopover, rmsTimePlot, rmsTimeLogic, dataHandler, hardwareLogic) {
         var currentUrl = $state.current.url;
@@ -582,7 +577,7 @@
                         dataHandler.addFilter(rmsTimeLogic.settings.filters[i]);
                     }
                     dataHandler.setMetrics(60);
-                    rmsTimePlot.init('#rmsTimeWindow', rmsTimeLogic.settings.nChannels, rmsTimeLogic.settings.zoomOption, hardwareLogic.settings.frequency);
+                    rmsTimePlot.init('#rmsTimeWindow', rmsTimeLogic.settings.nChannels, rmsTimeLogic.settings.zoomOption, rmsTimeLogic.settings.xMax, hardwareLogic.settings.frequency);
                     paintStep();
                 });
         }

@@ -38,9 +38,6 @@
                 <h3 style="text-align:center">
                     # Channels
                 </h3>
-<!--              <div class="item item-divider"> 
-                <center># Channels</center>
-              </div>-->
               <p>&nbsp&nbsp&nbsp
                 <label ng-repeat="item in hardwareLogic.channelList">
                     <input type="radio" ng-model="rmsTimeLogic.settings.nChannels" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
@@ -49,12 +46,17 @@
               <h3 style="text-align:center">
                 Zoom Options
               </h3>
-<!--              <div class="item item-divider"> 
-                <center>Zoom Options</center>
-              </div>-->
               <p>&nbsp&nbsp&nbsp
                 <label ng-repeat="item in rmsTimeLogic.zoomList">
                     <input type="radio" ng-model="rmsTimeLogic.settings.zoomOption" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
+                </label>
+              </p>
+              <h3 style="text-align:center">
+                Window Size
+              </h3>
+              <p>&nbsp&nbsp&nbsp
+                <label ng-repeat="item in rmsTimeLogic.xMaxList">
+                    <input type="radio" ng-model="rmsTimeLogic.settings.xMax" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
                 </label>
               </p>
       
