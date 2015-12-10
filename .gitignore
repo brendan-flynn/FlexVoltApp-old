@@ -5,14 +5,14 @@
  FlexVolt/platforms/
  
  # keys
- *.pem
- *.keystore
+ **/*.pem
+ **/*.keystore
  
  # Builds
- *.crx
- *.zip
- *.apk
- *.ap_
+ **/*.crx
+ **/*.zip
+ **/*.apk
+ **/*.ap_
  
  # Log files
- *.log
+ **/*.log
