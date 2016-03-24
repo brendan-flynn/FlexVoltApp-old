@@ -3,17 +3,12 @@
   "version": "0.0.4",
   "main": "collide.js",
   "scripts": {
-    "build": "mkdir -p dist && browserify src/index.js -s collide > dist/collide.js",
-    "test": "node_modules/.bin/jasmine-node test --color",
-    "autotest": "node_modules/.bin/jasmine-node test --watch src --autotest --color"
+    "build": "mkdir -p dist && browserify src/index.js -s collide > dist/collide.js"
   },
   "dependencies": {
-    "raf": "^2.0.1",
-    "feature": "^0.1.4",
-    "performance-now": "^0.1.3"
-  },
-  "devDependencies": {
-    "jasmine-node": "^1.14.5",
-    "proxyquire": "^1.0.1"
+    "events": "^1.0.1",
+    "promiscuous": "^0.6.0",
+    "node.extend": "^1.0.10",
+    "raf": "^2.0.1"
   }
 }

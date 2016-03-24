@@ -11,67 +11,45 @@ We built Collide because we wanted to give Ionic developers the power to build c
 
 Collide solves the problems with CSS animations using a simple Javascript animation engine and API. It also provides a tweening API similar to WebAnimations, and allows the developer to hook into every frame for full control over the behavior of the animation.
 
-Coming Soon:
+COMING SOON: 
 
+- Tweening API
+- Seperating configuration phase from running the animation.
 - Animation decay. Set a velocity on an animation and let it decelerate to a certain point.
 
 ### Development
 
 - `npm install`
 - `npm install -g browserify`
-- `npm run test` runs jasmine-node tests. `npm run autotest` will watch and test
 - `npm run build`
 - Generated file `dist/collide.js` is require/CommonJS/window friendly. If you include it, it will be included as `window.collide`.
 - Note: the `collide.js` found in project root is only updated on release. The built version in dist is not added to git and should be used while developing.
 
-### API
-
-**This is in flux, better documentation coming after API is stable**
+### API (quickly changing)
 
 ```js
-var animator = collide.animator({
-  // 'linear|ease|ease-in|ease-out|ease-in-out|cubic-bezer(x1,y1,x2,y2)',
-  // or function(t, duration),
-  // or a dynamics configuration (see below)
-  easing: 'ease-in-out', 
+var animator = collide.Animator({
   duration: 1000,
-  percent: 0,
-  reverse: false
+  easing: 'ease-in-out'
 });
 
-// Actions, all of these return `this` and are chainable
-// .on('step' callback is given a 'percent', 0-1, as argument (for springs it could be outside 0-1 range)
-// .on('stop' callback is given a boolean, wasCompleted
-animator.on(/step|destroy|start|stop|complete/, function() {})
-animator.once(...) //same event types
-animator.off(...) //works like jquery.off
-animator.stop(); //stop/pause at current position
-animator.start(); //start from current position
-animator.restrart(); //start over
-animator.destroy(); //unbind all events & deallocate
+// .on('step' callback is given a 'percent', 0-1, as argument
+// .on('complete' callback is given a boolean, wasCancelled
+animator.on(/step|pause|cancel|play|complete|start/, function() {})
+animator.once(...) //same events
+animator.promise(); // .then(onStop(boolean wasCompleted), onCancel(boolean wasError))
+animator.pause();
+animator.cancel();
+animator.play();
+animator.percent(newPercent); //setter
+animator.reverse(isReverse); //setter
+animator.autoReverse(isAutoReverse); //setter
+animator.repeat(repeatCount); //setter
 
-animator.isRunning(); //boolean getter
+animator.isReverse(); //boolean getter
+animator.isPlaying(); //boolean getter
 
-//These are getters and setters.
-//No arguments is a getter, argument is a chainable setter.
-animator.percent(newPercent); //0-1
-animator.duration(duration); //milliseconds
-animator.reverse(isReverse);
-animator.easing(easing); //setter, string|function(t,duration)|dynamicsConfiguration.
-// Dynamics configuration looks like this one of these:
-// animator.easing({
-//   type: 'spring',
-//   frequency: 15,
-//   friction: 200,
-//   initialForce: false
-// });
-// animator.easing({
-//   type: 'gravity',
-//   frequency: 15,
-//   friction: 200,
-//   initialForce: false
-// });
-
+animator.percent(0).pause(); //chainable
 ```
 
 ### Examples
@@ -79,13 +57,13 @@ animator.easing(easing); //setter, string|function(t,duration)|dynamicsConfigura
 See test.html.
 
 ```js
-var animator = collide.animator({
+var animator = collide.Animator({
   duration: 1000,
-  easing: 'ease-in-out'
+  easing: 'spring'
 })
   .on('step', function(v) {
     //Have the element spring over 400px
     myElement.css('webkitTransform', 'translateX(' + (v*400) + 'px)');
   })
-  .start();
+  .play();
 ```

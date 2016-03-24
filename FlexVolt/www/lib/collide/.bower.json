@@ -1,19 +1,20 @@
 {
   "name": "collide",
-  "version": "1.0.0-beta.1",
+  "version": "0.0.4",
   "main": "collide.js",
   "ignore": [
     "src"
   ],
   "dependencies": {},
   "homepage": "https://github.com/driftyco/collide",
-  "_release": "1.0.0-beta.1",
+  "_release": "0.0.4",
   "_resolution": {
     "type": "version",
-    "tag": "v1.0.0-beta.1",
-    "commit": "bbc4a1c2b160181d4115c2c7369ae82243cbb475"
+    "tag": "0.0.4",
+    "commit": "1fc10010e3c5ec7f2c26066326aa03187a995bba"
   },
   "_source": "git://github.com/driftyco/collide.git",
-  "_target": "1.0.0-beta.1",
-  "_originalSource": "collide"
+  "_target": "~0.0.4",
+  "_originalSource": "collide",
+  "_direct": true
 }
