@@ -9,40 +9,14 @@
         <filters-popover ng-if="!mobile"></filters-popover>
         <settings-popover></settings-popover>
     </ion-nav-buttons>
-  <ion-content class="has-header">
+  <ion-content class="has-header" scroll="false">
+      <save-panel></save-panel>
       <!--This div, #traceWindow in this case, gets grabbed by d3 plotting features-->
       <div ng-if="!demo && flexvolt.api.connection.state !== 'connected'">
           <div>FlexVolt connection status: {{flexvolt.getDetailedConnectionStatus()}}</div>
           <div>If you are having trouble connecting, check connection settings, or try Demos to see what this task would do.</div>
       </div>
       <div id="traceWindow"></div>
-<!--      <div class="row" ng-if="demo || (flexvolt.api.connection.state === 'connected' && flexvolt.api.connection.data === 'on')">
-        <div class="col-40 col-offset-10">
-            <button class="button" ng-click="toggleLive()">
-                <i ng-if="!recordControls.live" >Return to Live Signal</i>
-                <i ng-if="recordControls.live">View Recorded Signals</i>
-            </button>
-        </div>
-        <div class="col-25">
-            <span ng-if="recordControls.live === false">
-                <button class="button button-icon" ng-click="togglePlayback()">
-                  <i ng-if="!recordControls.playingBack" class="icon ion-play dark"></i>
-                  <i ng-if="!!recordControls.playingBack" class="icon ion-stop dark"></i>
-                </button>
-            </span>
-            <span ng-if="recordControls.live === true">
-                <button class="button button-icon" ng-click="toggleRecording()">
-                  <i ng-if="!recordControls.recording" class="icon ion-record assertive"></i>
-                  <i ng-if="!!recordControls.recording" class="icon ion-stop assertive"></i>
-                </button>
-            </span>
-        </div>
-        <div>
-            <select class="button" ng-change="updateSelectedData()" ng-model="recordControls.selectedRecord" ng-options="opt as opt.name for opt in recordControls.recordedSignals">
-                <option value="">Select Recorded Signal:</option>
-            </select>
-        </div>
-      </div>-->
       
   </ion-content>
 </ion-view>
@@ -62,26 +36,26 @@
                 </div>-->
                 <p>&nbsp&nbsp&nbsp
                     <label ng-repeat="item in hardwareLogic.availableChannelList()">
-                        <input type="radio" ng-model="traceLogic.settings.nChannels" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
+                        <input type="radio" ng-model="pageLogic.settings.nChannels" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
                     </label>
                 </p>
 <!--                <div class="item item-divider"> 
                     <center># Channels Dropdown</center>
                 </div>
-                <select ng-change="onChange()" ng-model="traceLogic.settings.nChannels" ng-options="opt.value as opt.text for opt in hardwareLogic.availableChannelList()"></select>-->
+                <select ng-change="onChange()" ng-model="pageLogic.settings.nChannels" ng-options="opt.value as opt.text for opt in hardwareLogic.availableChannelList()"></select>-->
                 
 <!--                <div class="item item-divider"> 
                     <center>Gain Radio</center>
                 </div>
                 <p>&nbsp&nbsp&nbsp
-                    <label ng-repeat="item in traceLogic.gainList">
-                        <input type="radio" ng-model="traceLogic.settings.gain" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
+                    <label ng-repeat="item in pageLogic.gainList">
+                        <input type="radio" ng-model="pageLogic.settings.gain" ng-change="onChange()" ng-value="item.value"/>&nbsp{{item.text}}&nbsp&nbsp
                     </label>
                 </p>
                 <div class="item item-divider"> 
                     <center>Gain Dropdown</center>
                 </div>
-                <select ng-change="onChange()" ng-model="traceLogic.settings.gain" ng-options="opt.value as opt.text for opt in traceLogic.gainList"></select>-->
+                <select ng-change="onChange()" ng-model="pageLogic.settings.gain" ng-options="opt.value as opt.text for opt in pageLogic.gainList"></select>-->
                 
                 <filter-options ng-if="mobile"></filter-options>
 

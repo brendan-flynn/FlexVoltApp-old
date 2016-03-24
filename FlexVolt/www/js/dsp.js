@@ -16,9 +16,10 @@
     
 angular.module('flexvolt.dsp', [])
 
-.factory('dataHandler', ['flexvolt', '$stateParams', 'storage', 'hardwareLogic', 'filters',
-    function (flexvolt, $stateParams, storage, hardwareLogic, filters) {
+.factory('dataHandler', ['flexvolt', '$stateParams', 'storage', 'hardwareLogic', 'filters', 'file',
+    function (flexvolt, $stateParams, storage, hardwareLogic, filters, file) {
         
+        window.file = file;
         // list of possible filters
         var filterList = [];
         
@@ -34,8 +35,8 @@ angular.module('flexvolt.dsp', [])
             time: 0,
             startTime: undefined,
             randAmplitude: 10,
-            amplitudes: [50, 50, 50, 50, 50, 50, 50, 50],
-            frequencies: [5, 10, 15, 20, 30, 50, 70, 100]
+            amplitudes: [20, 50, 20, 22, 70, 20, 10, 10],
+            frequencies: [0.05, 10, 15, 20, 30, 50, 70, 100]
         };
     
         var api = {
@@ -74,7 +75,15 @@ angular.module('flexvolt.dsp', [])
                     if (i === 0){
                         gen[ch] = [];
                     }
-                    gen[ch][i] = G*demoVals.amplitudes[ch]*Math.sin(demoVals.time*2*Math.PI*demoVals.frequencies[ch]);
+                    gen[ch][i] = Math.round(G*demoVals.amplitudes[ch]*Math.sin(demoVals.time*2*Math.PI*demoVals.frequencies[ch]));
+//                    if (demoVals.time > 3 && demoVals.time < 5 && (ch === 2 || ch === 3)){
+//                      gen[ch][i] = Math.round(G*demoVals.amplitudes[ch]*(1+demoVals.time-3)*(0.9+0.2*Math.random()));
+//                    } else if (demoVals.time >= 5 && demoVals.time < 7 && (ch === 2 || ch === 3)){
+//                      gen[ch][i] = Math.round(G*demoVals.amplitudes[ch]*(1+2-(demoVals.time-5))*(0.9+0.2*Math.random()));
+//                    } else {
+//                      gen[ch][i] = Math.round(G*demoVals.amplitudes[ch]*(1+0.05*Math.random()));
+//                    }
+                    
                     //gen[ch][i] += demoVals.randAmplitude*2*(Math.random()-0.5); // random noise
                 }
             }
@@ -191,7 +200,7 @@ angular.module('flexvolt.dsp', [])
             // save data BEFORE altering
             if (recordData){
                 for (var i = 0; i < nChannels; i++){
-                    recordedData[i] = recordedData[i].concat(parsedData[i]);
+                    recordedData[i].data = recordedData[i].data.concat(parsedData[i]);
                 }
             }
             
@@ -225,7 +234,10 @@ angular.module('flexvolt.dsp', [])
         api.startRecording = function(){
             recordedData = [];
             for (var i = 0; i < nChannels; i++){
-                recordedData[i] = [];
+                recordedData[i] = {
+                  channel: i,
+                  data: []
+                };
             }
             recordData = true;
         };
@@ -233,16 +245,18 @@ angular.module('flexvolt.dsp', [])
         api.stopRecording = function(){
             recordData = false;
             var d = new Date();
-            var name = 'recorded-data--'+d.getFullYear()+'-'
+            var name = 'flexvolt-recorded-data--'+d.getFullYear()+'-'
                 +(d.getMonth()+1)+'-'+d.getDate()+'--'
                 +d.getHours()+'-'+d.getMinutes()+'-'
                 +d.getSeconds();
-            var setObj = {};
+            //var setObj = {};
             //setObj[name] = recordedData;
             var t1 = Date.now();
             //storage.set(setObj);
-            recordedDataStorage[name] = recordedData;
+            //recordedDataStorage[name] = recordedData;
+            file.writeFile(name,recordedData);
             var t2 = Date.now();
+            recordedData = [];
             console.log('StorageTime: '+(t2-t1));
         };
 

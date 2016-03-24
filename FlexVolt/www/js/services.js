@@ -221,6 +221,184 @@ angular.module('flexvolt.services', [])
 //    
 //    return clipboard;
 //})
+.factory('file', ['$q', 'storage', function($q, storage){
+    var file = {
+        getDirectory: undefined,
+        currentEntry: undefined,
+        path: undefined,
+        id: undefined,
+        readFile: undefined,
+        writeFile: undefined
+    };
+    
+    
+    storage.get('saveDirectory')
+      .then(function(tmp){
+          if (tmp){
+              file.currentEntry = tmp['entry'];
+              file.path = tmp['path'];
+              file.id = tmp['id'];
+              chrome.fileSystem.isRestorable(file.id, function(isRestorable){
+                if (isRestorable){
+                  console.log('isrestorable');
+                  chrome.fileSystem.restoreEntry(file.id, gotEntry)
+                } else {
+                  file.currentEntry = undefined;
+                  file.path = undefined;
+                  file.id = undefined;
+                }
+              });
+              console.log('DEBUG: settings: '+angular.toJson(tmp));
+          }
+      });
+    
+    function gotEntry(entry){
+      var deferred = $q.defer();
+      console.log('entry: '+angular.toJson(entry));
+      file.currentEntry = entry;
+      file.id = chrome.fileSystem.retainEntry(file.currentEntry)
+      console.log('file.currentEntry: '+angular.toJson(file.currentEntry));
+      chrome.fileSystem.getDisplayPath(file.currentEntry, function(displayPath){
+        if (!file.currentEntry || !file.currentEntry.isDirectory){
+            console.log('displayPath: none');
+            file.currentEntry = undefined;
+            file.path = undefined; 
+            file.id = undefined;
+            console.log('resolving gotEntry, no entry');
+            deferred.resolve();
+        } else {
+            chrome.fileSystem.getDisplayPath(file.currentEntry, function(displayPath){
+              console.log('displayPath: '+angular.toJson(displayPath));
+              file.path = displayPath;
+              storage.set({saveDirectory:{path: file.path, entry: file.currentEntry, id: file.id }});
+              console.log('resolving gotEntry');
+              deferred.resolve();
+            });
+        }
+      });
+      
+      return deferred.promise;
+    }
+    
+    function errorHandler(e){
+        console.log('ERROR: in fileSystem: '+angular.toJson(e));
+    };
+    
+    function convertToCSV(dataObj) {
+        var str = '';
+       
+        var nPts = dataObj[0].data.length;
+
+        var header = '';
+        for (var i = 0; i < dataObj.length; i++) {
+            header += 'Channel'+(dataObj[i].channel+1)+',';
+        }
+        str += header + '\r\n';
+        
+        for (var jPts = 0; jPts < nPts; jPts++) {
+            var line = '';
+            
+            for (var i = 0; i < dataObj.length; i++) {
+                line += dataObj[i].data[jPts]+',';
+            }
+
+            str += line + '\r\n';
+        }
+
+        return str;
+    }
+      
+    
+    if (window.cordova) {
+        file.getDirectory = function(){
+          console.log('cordova file getDirectory');
+        };
+        file.readFile = function(){
+          console.log('cordova file readFile');
+        };
+        file.writeFile = function(){
+          console.log('cordova file writeFile');
+        };
+        
+    } else if (chrome && chrome.fileSystem) {
+
+        file.getDirectory = function(){
+          var deferred = $q.defer();
+          
+          chrome.fileSystem.chooseEntry({type:'openDirectory'}, function(entry){
+            gotEntry(entry).
+              then(function(){
+                console.log('resolving after gotEntry');
+                deferred.resolve();
+              });
+          });
+          
+          return deferred.promise;
+        };
+        
+        var writeFile = function(filename, data){
+          // handle extensions
+          if (filename.indexOf('.') < 0){
+            filename = filename + '.txt';
+          }
+          
+          window.d = data;
+          // convert to csv, then text blob
+          data = convertToCSV(data);
+          data = new Blob([data]);
+          
+          chrome.fileSystem.getWritableEntry(file.currentEntry, function(entry){
+            if (chrome.runtime.lastError) {
+                console.log('ERROR: Chrome runtime error during fileSystem.getWritableEntry: '+chrome.runtime.lastError.message);
+            }
+            entry.getFile(filename, {create: true}, function(newEntry){
+              newEntry.createWriter(function(writer){
+//                writer.onwrite = function(){
+//                  writer.onwrite = null;
+//                  writer.truncate(Writer.position);
+//                };
+                writer.onwriteend = function(){
+                  console.log('Write completed.');
+                };
+                
+                writer.onwriteerror = function(e){
+                  console.log('Error writing file.');
+                };
+                
+                writer.write(data,{type: 'text/plain'});
+              }, errorHandler);
+            }, errorHandler);
+          });
+        };
+        
+        file.writeFile = function(filename, data){
+          if (!file.currentEntry || !file.currentEntry.isDirectory){
+            file.getDirectory().
+              then(function(){
+                console.log('file.getDirectory.then, now writing');  
+                writeFile(filename, data);
+              });
+          } else {
+            console.log('already have a directory - writing');
+            writeFile(filename, data);
+          }
+          
+        }
+        window.fs = chrome.fileSystem;
+    } else {
+        file.getDirectory = function(){
+          console.log('unknown os file getDirectory');
+        };
+        file.readFile = function(){
+          console.log('unknown os file readFile');
+        };
+        file.writeFile = function(){
+          console.log('unknown os file writeFile');
+        };
+    }
+    
+    return file;
+}])
 .factory('storage', ['$window', '$q', function($window, $q) {
     var storage = {
         set: undefined,

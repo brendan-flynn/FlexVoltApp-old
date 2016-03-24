@@ -304,10 +304,9 @@ angular.module('flexvolt.flexvolt', [])
                     api.tryList.splice(api.tryList.length,0,api.preferredPortList[i]);
                 }
                 console.log('Updated tryList: '+JSON.stringify(api.tryList));
+                api.portList = api.tryList;
+                api.portList.reverse();
             } else {console.log('No preferred ports found');}
-            
-            
-            
             
             // pass it to a function that will try each port
             tryPorts();

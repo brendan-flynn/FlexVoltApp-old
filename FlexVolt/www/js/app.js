@@ -11,6 +11,9 @@
     angular.module('flexvolt', [
         'ionic',
         'ngSanitize',
+        'xeditable',
+//        'ui.bootstrap',
+//        'bootstrap',
         'flexvolt.controllers',
         'flexvolt.services',
         'flexvolt.directives',
@@ -21,7 +24,9 @@
         'flexvolt.dsp'
     ])
     
-    .run(function($ionicPlatform) {
+    .run(function(editableOptions,$ionicPlatform) {
+      editableOptions.theme = 'default'; // bootstrap3 theme. Can be also 'bs2', 'bs3', 'default'
+
       $ionicPlatform.ready(function() {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
         // for form inputs)
@@ -70,7 +75,7 @@
         //    window.addEventListener('orientationchange', doOnOrientationChange);
 
         window.onresize = function(){ 
-            console.log('INFO: Resized to w:'+window.innerWidth+', h:'+window.innerHeight);
+            //console.log('INFO: Resized to w:'+window.innerWidth+', h:'+window.innerHeight);
             //setTimeout(doOnOrientationChange,0);
         };
         
@@ -108,7 +113,7 @@
 
         // return resize function control (in each page it is redefined to resize that animation/plot
         window.onresize = function(){ 
-            console.log('INFO: Resized to w:'+window.innerWidth+', h:'+window.innerHeight);
+            //console.log('INFO: Resized to w:'+window.innerWidth+', h:'+window.innerHeight);
             //setTimeout(doOnOrientationChange,0);
         };
       }
@@ -153,11 +158,11 @@
         })
 
         .state('myometer', {
-            url: '/myometer',
+            url: '/myometer:demo',
             templateUrl: 'templates/myometer.html',
-            controller: 'MyometerCtrl'
-//            onEnter: dataOn,
-//            onExit: exitFunction
+            controller: 'MyometerCtrl',
+            onEnter: dataOn,
+            onExit: exitFunction
         })
 
         .state('ekg', {

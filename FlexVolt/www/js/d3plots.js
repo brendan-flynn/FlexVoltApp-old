@@ -17,11 +17,252 @@ angular.module('flexvolt.d3plots', [])
 /**
  * Abstracts the flexvolt, deals with bluetooth communications, etc.
  */
+.factory('myometerPlot', function() {
+    var mar, margin, width, height, plotElement;
+    mar = 10;
+    margin = {top: mar, right: mar, bottom: mar, left: 70};
+    var headerPadding = 0;
+    var footerPadding = 200;
+    width = window.innerWidth - margin.left - margin.right,
+    height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
+    
+    //console.log('height: '+height);
+    
+    var GAIN = 1845; // 
+    var yMax = 1000*2.5/GAIN; //mV // 1.35
+    var factor = 1000*2.5/(GAIN*128); // 0.0105
+    
+    var svg, xScale, xAxis, yScale, yAxis, data = [], bar, yLabel;
+    var textLabel = undefined;
+    var updateTargets;
+    var yTicks = [0, 5, 10, 15, 20, 25, 30, 35];
+    
+    var api = {
+      init:undefined,
+      reset:undefined,
+      resize:undefined,
+      update:undefined,
+      settings:undefined,
+      addText: undefined,
+      removeText: undefined
+    };
+    
+    var dragging = false;
+    
+    var drag = d3.behavior.drag()
+      .origin(Object)
+      .on('dragstart', function(){dragging = true;})
+      .on("drag", dragmove)
+      .on('dragend', function(){
+        var dragger = d3.select(this);
+        var colInd = dragger[0][0]['__data__']['x'];
+        var newVal = parseInt(dragger.attr("y"));
+        var scaledVal;
+        if (api.settings.baselineMode === 'absolute'){
+          scaledVal = parseInt(yMax*((height-newVal)/height)/factor);
+        } else if (api.settings.baselineMode === 'relative'){
+          scaledVal = parseInt(100*((height-newVal)/height));
+        }
+        //console.log('ob: '+colInd+'to: '+ newVal+ ', and scaled: '+scaledVal);
+        updateTargets(colInd, scaledVal);
+        api.settings.targets[api.settings.baselineMode][colInd-1] = scaledVal;
+        api.reset();
+        dragging = false;
+        });
+
+    function dragmove() {
+      var dragger = d3.select(this);
+      //var colInd = dragger[0][0]['__data__']['x'];
+      var newVal = d3.event.dy + parseInt(dragger.attr("y"));
+      //console.log('ob: '+colInd+'from: '+ parseInt(dragger.attr("y"))+ ', plus: '+(d3.event.dy)+', to '+newVal);
+      newVal = Math.min(Math.max(newVal,0),height);
+//      var scaledVal;
+//      if (api.settings.baselineMode === 'absolute'){
+//        scaledVal = parseInt((newVal/height)/factor);
+//      } else if (api.settings.baselineMode === 'relative'){
+//        scaledVal = parseInt(100*(newVal/height));
+//      }
+      //console.log('dragged: newVal:'+newVal+', scalledVal: '+scaledVal);
+      dragger.attr("y", function(){return newVal;});
+    }
+
+    
+    function drawTargets(){
+      svg.selectAll('limits')
+          .data(data)
+          .enter()
+          .append('rect')
+          .attr("rx", 6)
+          .attr("ry", 6)
+          .attr('x', function(d) {return xScale(d.x)-3;})
+          .attr('y', function(d) {return yScale(d.target);})
+          .attr('width', xScale.rangeBand()+6)
+          .attr('height', 6)
+          .attr('stroke', 'rgb(0,0,0)')
+          .attr('fill', 'rgb(150, 150, 150)')
+          .attr("cursor", "move")
+          .call(drag);;
+
+    }
+    
+    api.reset = function(){
+      if (svg){
+        svg.selectAll('path.rect').remove();
+        d3.select('svg').remove();
+      }
+      
+      data = [];     
+      var targetTmp;
+      for (var k = 0; k<api.settings.nChannels; k++){
+          data[k]={x:0, y:0, limit:-50, label:''};
+          data[k].x = k+1;
+          data[k].value = 0;
+          if (api.settings.baselineMode === 'relative'){
+            targetTmp = api.settings.targets[api.settings.baselineMode][k];
+            targetTmp = Math.min(Math.max(targetTmp,0),100);
+          } else if (api.settings.baselineMode === 'absolute'){
+            targetTmp = factor*api.settings.targets[api.settings.baselineMode][k];
+            targetTmp = Math.min(Math.max(targetTmp,0),yMax);
+          }
+          data[k].target = targetTmp;
+          
+          data[k].label = api.settings.labels[k];
+      }
+      
+      xScale = d3.scale.ordinal()
+        .rangeBands([0, width], 0.2)
+        .domain(data.map(function(d) { return d.x; }));
+
+      yScale = d3.scale.linear()
+        .range([height, 0])
+
+      if (api.settings.baselineMode === 'absolute'){
+        yScale.domain([0, yMax])
+        yLabel = 'Signal Strength, mV';
+      } else if (api.settings.baselineMode === 'relative'){
+        yScale.domain([0, 100]);
+        yLabel = '% Maximum Contraction';
+      }
+
+      yAxis = d3.svg.axis()
+              .scale(yScale)
+              .orient('left')
+//              .tickValues(yTicks)
+              .tickSize(10,0)
+              .tickSubdivide(true)
+              .tickPadding(10)
+              .tickSize(-width);
+      
+      xAxis = d3.svg.axis().scale(xScale).orient('bottom').tickFormat(function(d,i){return api.settings.labels[i];}).tickSize(10);
+
+      svg = d3.select(plotElement).append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+      // x-axis
+      svg.append('g')
+          .attr('class', 'axisnoline')
+          .attr('font-size', 20)
+          .attr('fill', 'rgb(0,0,0)')
+          .attr('format', 'd')
+          .attr('transform', 'translate(0,' + height + ')')
+          .call(xAxis)
+  
+      // y-axis
+      svg.append('g')
+          .attr('class', 'axisnoline')
+          .attr('font-size', 20)
+          .attr('fill', 'rgb(0,0,0)')
+          .call(yAxis)
+          .append('text')
+          .attr('class', 'label')
+          .attr('transform', 'rotate(-90)')
+          .attr('y', -60)
+          .attr('x', -height/2)
+          .attr('dy', '.71em')
+          .attr('fill', 'rgb(0,0,0)')
+          .style('text-anchor', 'middle')
+          .text(yLabel);
+  
+      drawTargets();
+    };
+
+    api.init = function(element, settings, limitsCB){
+        width = window.innerWidth - margin.left - margin.right,
+        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
+        plotElement = element;
+        api.settings = settings;
+        updateTargets = limitsCB;
+        
+        api.reset();
+    };
+    
+    api.addText = function(text){
+      d3.select('#notificationText').remove();
+      //console.log('DEBUG: added text: '+text);
+      textLabel = text;
+    };
+    
+    api.removeText = function(){
+      d3.select('#notificationText').remove();
+      textLabel = undefined;
+    };
+    
+    api.update = function(dataIn){
+      if (dragging){
+        // don't update rectangles while dragging - race conditions
+        return;
+      }
+      
+      for (var k = 0; k < api.settings.nChannels; k++){
+        data[k].value = Math.max(0,dataIn[k]); // adjusting to actual
+      }
+
+      svg.selectAll('rect').remove();
+      svg.selectAll('bars')
+        .data(data)
+        .enter()
+        .append('rect')
+        .attr('x', function(d) {return xScale(d.x);})
+        .attr('y', function(d) {return yScale(d.value);})
+        .attr('width', xScale.rangeBand())
+        .attr('height', function(d) {return height-yScale(d.value);})
+        .attr('stroke', 'rgb(0,0,0)')
+        .attr('fill', function(d) {if(d.value > d.target){return 'orange';} else {return 'blue';}});
+
+      drawTargets();
+
+      if (textLabel){
+        d3.select('#notificationText').remove();
+        svg.append('text')
+          .attr('id','notificationText')
+          .attr('x', width/2)
+          .attr('y', margin.top+height/2)
+          .text(textLabel)
+          .attr('fill','black')
+          .attr('text-anchor', 'middle')
+          .style('font', '16px Helvetica');
+      }
+    }
+    
+    api.resize = function(){
+        console.log('DEBUG: plot resized');
+        width = window.innerWidth - margin.left - margin.right,
+        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
+          
+        api.reset();
+    };
+
+    return api;
+})
 .factory('xyDot', function() {
     var mar, margin, width, height, plotElement;
     mar = 10;
     margin = {top: mar, right: mar, bottom: mar, left: mar};
-    
+    var headerPadding = 44;
+    var footerPadding = 68;
     var xValue, xScale, xMap, yValue, yScale, yMap;
     var tail = true;
     var dataset = [];
@@ -33,10 +274,6 @@ angular.module('flexvolt.d3plots', [])
         init:undefined,
         update:undefined,
         resize:undefined,
-        size:{
-            width:undefined,
-            height:undefined
-        },
         dotRadius:undefined,
         settings:{
             s1:1,
@@ -44,11 +281,17 @@ angular.module('flexvolt.d3plots', [])
         }
     };
     
-    width = window.innerWidth - margin.left - margin.right,
-    height = window.innerHeight - 150 - margin.top - margin.bottom;
     api.dotRadius = 15;
     
-    function reset(){
+    api.reset = function(){
+        if (svg){
+          d3.select('svg').remove();
+        }
+        svg = d3.select(plotElement).append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+    
         xValue = function(d) { return d.x;},
         xScale = d3.scale.linear()
             .range([api.dotRadius, width-api.dotRadius])
@@ -59,15 +302,7 @@ angular.module('flexvolt.d3plots', [])
             .range([height-api.dotRadius, api.dotRadius])
             .domain([0, 255]),
         yMap = function(d) {return yScale(yValue(d));};
-    }
 
-    function init(element){
-        plotElement = element;
-        svg = d3.select(element).append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-      
         if (!!tail){
           for (var i=0; i<nDots;i++){
             dataset[i]={
@@ -87,22 +322,17 @@ angular.module('flexvolt.d3plots', [])
             o:1.0
           };
         }
+    }
+
+    api.init = function(element){
+        plotElement = element;
+        width = window.innerWidth - margin.left - margin.right,
+        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
         
-        reset();
-      
-//        svg.selectAll('circle')
-//            .data(dataset)
-//            .enter().append("circle")
-//            .style("stroke", "gray")
-//            .style("fill", function(d){return d.c;})
-//            .style('opacity', function(d){return d.o;})
-//            .attr("r", function(d){return d.r;})
-//            .attr("cx", xMap)
-//            .attr("cy", yMap);
-        
+        api.reset();
     }
     
-    function update(xIn, yIn){
+    api.update = function(xIn, yIn){
         if(!!tail){
           for (var i=nDots-1; i>0; i--){
                 dataset[i].x = dataset[i-1].x;
@@ -118,7 +348,7 @@ angular.module('flexvolt.d3plots', [])
         svg.selectAll('circle').remove();
         svg.selectAll('circle')
             .data(dataset)
-            .enter().append("circle")
+            .enter().append('circle')
             .style('stroke', function(d){return d.c;})
             .style('fill', function(d){return d.c;})
             .style('opacity', function(d){return d.o;})
@@ -129,40 +359,10 @@ angular.module('flexvolt.d3plots', [])
     
     api.resize = function(){
         width = window.innerWidth - margin.left - margin.right,
-        height = window.innerHeight - 50 - margin.top - margin.bottom;
-        d3.select('svg').remove();
-        svg = d3.select(plotElement).append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-      
-        if (!!tail){
-          for (var i=0; i<nDots;i++){
-            dataset[i]={
-              x:width/2,
-              y:height/2,
-              r:15,
-              c:'#1f77b4',
-              o:(1.0-i/nDots)
-            };
-          }
-        } else {
-          dataset[0]={
-            x:width/2,
-            y:height/2,
-            r:15,
-            c:'#1f77b4',
-            o:1.0
-          };
-        }
+        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
         
-        reset();
+        api.reset();
     };
-
-    api.init = init;
-    api.update = update;
-    api.size.width = width;
-    api.size.height = height;
 
     return api;
 })
@@ -173,8 +373,7 @@ angular.module('flexvolt.d3plots', [])
     var headerPadding = 44;
     var footerPadding = 68;
     margin = {top: mar, right: mar, bottom: mar, left: mar};
-    width = window.innerWidth - margin.left - margin.right,
-    height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
+
     var yMax = 128;
     var tmpData = [];
     var xPos = 0, startPos = 0;
@@ -196,8 +395,17 @@ angular.module('flexvolt.d3plots', [])
       api.settings.nChannels = newN;
     }
     
-    function reset(){
-        svg.selectAll('path.line').remove();
+    api.reset = function(){
+        if (svg){
+          svg.selectAll('path.line').remove();
+          d3.select('svg').remove();
+        }
+        svg = d3.select(plotElement).append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'); 
+    
         xPos = 0;
         startPos = 0;
         yA = [];
@@ -252,7 +460,9 @@ angular.module('flexvolt.d3plots', [])
         }
     }
 
-    function init(element, nChannels){
+    api.init = function(element, nChannels){
+        width = window.innerWidth - margin.left - margin.right,
+        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
         plotElement = element;
         yA = [];
         lineA = [];
@@ -266,10 +476,10 @@ angular.module('flexvolt.d3plots', [])
             .append('g')
             .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
           
-        reset();
+        api.reset();
     }
     
-    function update(dataIn){
+    api.update = function(dataIn){
         //console.log(angular.toJson(dataIn));
         startPos = xPos > 0?xPos-1:0;
         xPos += dataIn[0].length;
@@ -294,26 +504,15 @@ angular.module('flexvolt.d3plots', [])
                 .attr('d', lineA[i](dataIn[i]));
             tmpData[i] = dataIn[i].slice(-1)[0];
         }
-    }
+    };
     
     api.resize = function(){
         width = window.innerWidth - margin.left - margin.right,
-        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding
-        yA = [];
-        lineA = [];
-        d3.select('svg').remove();
-        svg = d3.select(plotElement).append('svg')
-            .attr('width', width + margin.left + margin.right)
-            .attr('height', height + margin.top + margin.bottom)
-            .append('g')
-            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'); 
-          
-        reset();
+        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
+        
+        api.reset();
     };
-    
-    api.init = init;
-    api.update = update;
-    api.reset = reset;
+
     api.setN = setN;
     
     return api;
@@ -321,9 +520,11 @@ angular.module('flexvolt.d3plots', [])
 .factory('rmsTimePlot', function() {
     var colorList = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
     var margin, width, height, plotElement, dT;
-    margin = {top: 30, right: 10, bottom: 40, left: 60};
-    width = window.innerWidth - margin.left - margin.right,
-    height = window.innerHeight - 120 - margin.top - margin.bottom;
+    var headerPadding = 44;
+    var footerPadding = 16;
+    var leftPadding = 150;
+    var rightPadding = 0;
+    margin = {top: 10, right: 20, bottom: 60, left: 60};
     
     var svg, x, scaleX, y, autoY, xAxis, yAxis, zoom, line;
     var panExtent, xMax;
@@ -331,7 +532,6 @@ angular.module('flexvolt.d3plots', [])
     var tmpData = [];
     
     var GAIN = 1845;
-    
     var yMax = 1000*2.5/GAIN; //mV // 130
     var factor = 1000*2.5/(GAIN*128);
 
@@ -363,9 +563,7 @@ angular.module('flexvolt.d3plots', [])
               .datum(data[i])
               .attr('class', 'line')
               .attr('clip-path', 'url(#clip)')
-              .attr('stroke', function(d,i){ 			
-                      return colorList[i%colorList.length];
-              })
+              .attr('stroke', colorList[i%colorList.length])
               .attr('d', line);
               //.attr('d', line(dataIn[i]));
       }
@@ -373,7 +571,7 @@ angular.module('flexvolt.d3plots', [])
       // tried this on-liner, doesn't work yet
 //        svg.selectAll('path.line').call(line);
 
-      // update axes - had to add some code to handle the axis ticks being in seconds, not ms
+      // reset axes - had to add some code to handle the axis ticks being in seconds, not ms
       scaleX = d3.scale.linear()
           .domain([x.domain()[0]*dT, x.domain()[1]*dT])
           .range([0, width]);
@@ -385,8 +583,8 @@ angular.module('flexvolt.d3plots', [])
           .tickSubdivide(true)	
           .orient('bottom');
 
-      svg.select(".x.axis").call(xAxis);
-      svg.select(".y.axis").call(yAxis);
+      svg.select('.x.axis').call(xAxis);
+      svg.select('.y.axis').call(yAxis);
     }
     
     function panLimit() {
@@ -437,8 +635,8 @@ angular.module('flexvolt.d3plots', [])
         return ret; 
     };
     
-    function reset(){
-        
+    api.reset = function(){
+  
         if (svg){
             svg.selectAll('path.line').remove();
             d3.select('svg').remove();
@@ -465,7 +663,7 @@ angular.module('flexvolt.d3plots', [])
         if (api.settings.autoscaleY){
             y.domain([0, autoY()]);
         }else {
-            y.domain([-yMax, yMax]);
+            y.domain([-0.01*yMax, yMax*1.01]);
         }
     
         if (api.settings.zoomOption === 'NONE'){
@@ -516,11 +714,13 @@ angular.module('flexvolt.d3plots', [])
     
         svg.append('g')
             .attr('class', 'x axis')
+//            .attr('fill','none')
             .attr('transform', 'translate(0,' + height + ')')
             .call(xAxis);
 
         svg.append('g')
             .attr('class', 'y axis')
+//            .attr('fill','none')
             .call(yAxis);
 
         svg.append('g')
@@ -530,7 +730,7 @@ angular.module('flexvolt.d3plots', [])
             .attr('transform', 'rotate(-90)')
             .attr('y', (-margin.left) + 15)
             .attr('x', -height/2-50)
-            .text('RMS Muscle Signal (mV)');	
+            .text('RMS Muscle Signal, mV');	
     
         svg.append('g')
             .attr('class', 'x axis')
@@ -538,7 +738,7 @@ angular.module('flexvolt.d3plots', [])
             .attr('class', 'axis-label')
             .attr('y', height+35)
             .attr('x', width/2)
-            .text('Time (ms)');	
+            .text('Time, s');	
 
         // keeps the zoom frame inside the plot window!
         svg.append('clipPath')
@@ -547,12 +747,15 @@ angular.module('flexvolt.d3plots', [])
             .attr('width', width)
             .attr('height', height);
 
-    }
+    };
 
-    function init(element, nChannels, newZoomOption, maxX, userFrequency){
+    api.init = function(element, nChannels, newZoomOption, maxX, userFrequency){
+        width = window.innerWidth - margin.left - margin.right - leftPadding - rightPadding,
+        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
+    
         dT = 1/userFrequency;
         xMax = maxX/dT; // seconds
-        panExtent = {x: [0,xMax], y: [-yMax,yMax] };
+        panExtent = {x: [0,xMax], y: [-0.01*yMax,1.01*yMax] };
     
         xPos = 0;
         startPos = 0;
@@ -561,10 +764,10 @@ angular.module('flexvolt.d3plots', [])
         api.settings.zoomOption = newZoomOption;
         api.settings.nChannels = nChannels;
         
-        reset();
-    }
+        api.reset();
+    };
     
-    function update(dataIn){
+    api.update = function(dataIn){
         startPos = xPos > 0?xPos-1:0;
         xPos += dataIn[0].length;
         if (xPos >= xMax){
@@ -593,82 +796,20 @@ angular.module('flexvolt.d3plots', [])
                 .datum(dataIn[i])
                 .attr('class', 'line')
                 .attr('clip-path', 'url(#clip)')
-                .attr('stroke', function(d,i){ 			
-                        return colorList[i%colorList.length];
-                })
+                .attr('stroke', colorList[i%colorList.length])
                 .attr('d', line);
 
             tmpData[i] = dataIn[i].slice(-1)[0];
         }
-    }
-    
-    // different than the rest because it's a different structure
-//    function update(dataIn){
-//        for (var i = 0; i < api.settings.nChannels; i++){
-//            var dataSet = dataIn[i];
-//            if (dataSet !== angular.undefined){
-//                subUpdate(dataIn);
-//            }
-//        }
-//    }
-//    
-//    function subUpdate(dataIn){
-////        console.log('t:'+JSON.stringify(timePos)+', n:'+JSON.stringify(nPoints));
-//        xPos += dataIn.length*dT;
-//        
-//        if (xPos >= xMax){
-//            //console.log('clearing');
-//            data = [];
-//            for (var i = 0; i < api.settings.nChannels;i++){
-//                data[i] = [];
-//            }
-//            
-//            xPos = 0;
-//            svg.selectAll('path.line').remove();
-//            return;
-//        } else {
-//            for (var i = 0; i < api.settings.nChannels;i++){
-//                //data[i].push({x:timePos,y:rms(dataIn[i])});
-//                data[i].push({x:timePos,y:dataIn[i]});
-//            }
-//            
-//            if (api.settings.autoscaleY){
-//                y.domain([0, autoY()]);
-//            }
-////            console.log(data);
-//            //console.log(data);
-//            svg.selectAll('path.line').remove();
-//            svg.selectAll('.line')
-//                .data(data)
-//                .enter()
-//                .append('path')
-//                .attr('class', 'line')
-//                .attr('clip-path', 'url(#clip)')
-//                .attr('stroke', function(d,i){ 			
-//                        return colorList[i%colorList.length];
-//                })
-//                .attr('d', line);
-//        } 
-//    }
+    };
     
     api.resize = function(){
         console.log('DEBUG: plot resized');
-        width = window.innerWidth - margin.left - margin.right,
-        height = window.innerHeight - 120 - margin.top - margin.bottom;
-
-        d3.select('svg').remove();
-        svg = d3.select(plotElement).append('svg')
-          .attr('width', width + margin.left + margin.right)
-          .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'); 
+        width = window.innerWidth - margin.left - margin.right - leftPadding - rightPadding,
+        height = window.innerHeight - margin.top - headerPadding - margin.bottom - footerPadding;
           
-        reset();
+        api.reset();
     };
-    
-    api.init = init;
-    api.update = update;
-    api.reset = reset;
     
     return api;
 })

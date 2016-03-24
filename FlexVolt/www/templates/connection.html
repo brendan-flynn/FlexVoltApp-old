@@ -31,14 +31,14 @@
                 <div class="col col-40 col-offset-20"><button ng-click="flexvolt.api.disconnect()">Disconnect</button></div>
             </div>
 
-            <div ng-if="!mobile">
+<!--            <div ng-if="!mobile">
             <p>Preferred Ports:</p>
             <select ng-model="selectedPrefPort" ng-options="port for port in prefPortList()"></select>
             <p>
                 <button ng-click="attemptToConnect(selectedPrefPort)">Connect Preferred Port</button>
             </p>
             <br>
-            </div>
+            </div>-->
             <p>All Available Ports:</p>
             <select ng-model="selectedPort" ng-options="port for port in portList()"></select>
             <!--<button ng-click="flexvolt.api.sendMsg('A')">Send 'A'</button>-->

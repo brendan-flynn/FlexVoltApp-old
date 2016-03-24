@@ -17,6 +17,8 @@ angular.module('flexvolt.taskLogic', [])
 .factory('logicOptions', [function(){
     var api = {};
     
+    api.colorOptions = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
+    
     api.filterOptions = [
         {
           type: 'Rectify',
@@ -273,8 +275,6 @@ angular.module('flexvolt.taskLogic', [])
                     settings[field] = tmp[field];
                 }
                 console.log('DEBUG: settings: '+angular.toJson(settings));
-            } else {
-                console.log('DEBUG: no settings found for GoDot, using defaults');
             }
             deferred.resolve();
         });
@@ -380,8 +380,6 @@ angular.module('flexvolt.taskLogic', [])
                     settings[field] = tmp[field];
                 }
                 //console.log('DEBUG: settings: '+angular.toJson(settings));
-            } else {
-                //console.log('DEBUG: no settings found for trace, using defaults');
             }
             deferred.resolve();
         });
@@ -403,8 +401,13 @@ angular.module('flexvolt.taskLogic', [])
         nChannels: 1,
         zoomOption: 'NONE',
         filters:[],
-        xMax: 20
+        xMax: 20,
+        labels:[]
     };
+    
+    for (var j = 0; j < 8; j++){
+      settings.labels.push({ch: (j+1),name: 'CH '+(j+1),color: logicOptions.colorOptions[j]});
+    }
     
     storage.get('rmsTimeSettings')
         .then(function(tmp){
@@ -414,9 +417,11 @@ angular.module('flexvolt.taskLogic', [])
                 }
                 //console.log('DEBUG: settings: '+angular.toJson(settings));
             } else {
-                settings.filters.push(angular.copy(logicOptions.filterOptions.filter(function(item){ return item.type === 'RMS';})[0]));
-                settings.zoomOptions = angular.copy(logicOptions.zoomList.filter(function(item){ return item.value === 'Y ONLY';})[0]);
-                //console.log('DEBUG: no settings found for RMS, using defaults');
+              settings.zoomOption = 'X AND Y';
+              
+              var F1 = angular.copy(logicOptions.filterOptions.filter(function(item){ return item.type === 'RMS';})[0]);
+              F1.params.windowSize.value = 21;
+              settings.filters.push(F1);
             }
             deferred.resolve();
         });
@@ -436,6 +441,60 @@ angular.module('flexvolt.taskLogic', [])
         settings: settings,
         zoomList: logicOptions.zoomList,
         xMaxList: xMaxList,
+        updateSettings: updateSettings,
+        ready: function(){return deferred.promise;}
+    };
+}])
+.factory('myometerLogic', ['$q', 'storage', 'logicOptions', function($q, storage, logicOptions) {
+    
+    var deferred = $q.defer();
+    var settings = {
+        nChannels: 1,
+        zoomOption: 'NONE',
+        filters:[],
+        xMax: 20,
+        baselineMode: undefined,
+        baselineModeList: [{text: 'Absolute',value: 'absolute'},{text: 'Relative Max',value: 'relative'}],
+        baselines: {},
+        targets: {
+          absolute: [50,50,50,50,50,50,50,50],
+          relative:  [50,50,50,50,50,50,50,50]
+        },
+        labels: []
+    };
+    
+    settings.baselineMode = settings.baselineModeList[0].value;
+    for (var i = 0; i < settings.baselineModeList.length; i++){
+      settings.baselines[settings.baselineModeList[i].value] = [];
+    }
+    
+    for (var j = 0; j < 8; j++){
+      settings.labels.push({ch: (j+1),name: 'CH '+(j+1)});
+      settings.baselines['absolute'].push({ch: (j+1),value: 0});
+      settings.baselines['relative'].push({ch: (j+1),value: 1.35});
+    }
+    
+    storage.get('myometerSettings')
+        .then(function(tmp){
+            if (tmp){
+                for (var field in tmp){
+                    settings[field] = tmp[field];
+                }
+            } else {
+              // Defaults - high pass to remove DC, RMS to downsample
+              var Filter1 = angular.copy(logicOptions.filterOptions.filter(function(item){ return item.name === 'Frequency - High Pass';})[0]);
+              Filter1.params.f1.value = 5;
+              settings.filters.push(Filter1);
+            }
+            deferred.resolve();
+        });
+
+    function updateSettings(){
+        storage.set({myometerSettings:settings});
+    }
+    
+    return {
+        settings: settings,
         updateSettings: updateSettings,
         ready: function(){return deferred.promise;}
     };

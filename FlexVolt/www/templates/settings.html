@@ -30,6 +30,11 @@
         <p>&nbsp&nbsp&nbsp
             0&nbsp&nbsp<input type="range" min=0 max=30 step=1 ng-model="settings.smoothFilterVal" ng-change="onChange()" style="vertical-align:middle">&nbsp&nbsp30<br/>
         </p>
+        <div ng-if="!mobile">
+        <h3 align="center">Data Save Directory</h3>
+        <p>Current: {{file.path}} &nbsp&nbsp <button ng-click="file.getDirectory()">Change</button>
+        </p>
+        </div>
 <!--        <h3 align="center">Data</h3>
         <div>
             <button ng-click="createFile()">create test file</button>

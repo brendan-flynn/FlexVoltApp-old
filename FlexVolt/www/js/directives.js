@@ -95,6 +95,12 @@ angular.module('flexvolt.directives', [])
         templateUrl: 'templates/filteroptions.html'
     };
 })
+.directive('savePanel', function(){
+    return {
+        restrict: 'E',
+        templateUrl: 'templates/savepanel.html'
+    };
+})
 ;
 
 }());
