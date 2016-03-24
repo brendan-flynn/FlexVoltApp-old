@@ -524,7 +524,7 @@ angular.module('flexvolt.d3plots', [])
     var footerPadding = 16;
     var leftPadding = 150;
     var rightPadding = 0;
-    margin = {top: 10, right: 20, bottom: 60, left: 60};
+    margin = {top: 10, right: 60, bottom: 60, left: 50};
     
     var svg, x, scaleX, y, autoY, xAxis, yAxis, zoom, line;
     var panExtent, xMax;
