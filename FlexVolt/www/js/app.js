@@ -11,9 +11,6 @@
     angular.module('flexvolt', [
         'ionic',
         'ngSanitize',
-        'xeditable',
-//        'ui.bootstrap',
-//        'bootstrap',
         'flexvolt.controllers',
         'flexvolt.services',
         'flexvolt.directives',
@@ -24,8 +21,8 @@
         'flexvolt.dsp'
     ])
     
-    .run(function(editableOptions,$ionicPlatform) {
-      editableOptions.theme = 'default'; // bootstrap3 theme. Can be also 'bs2', 'bs3', 'default'
+    .run(function($ionicPlatform) {
+      //editableOptions.theme = 'default'; // bootstrap3 theme. Can be also 'bs2', 'bs3', 'default'
 
       $ionicPlatform.ready(function() {
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -87,14 +84,15 @@
     //.config(function($ionicConfigProvider){
     //    $ionicConfigProvider.views.maxCache(0);
     //})
-    .config(function($provide) {
-        // Prevent Angular from sniffing for the history API
-        // since it's not supported in packaged apps.
-        $provide.decorator('$window', function($delegate) {
-            $delegate.history = false;
-            return $delegate;
-        });
-    })
+//    .config(function($provide) {
+//        // Prevent Angular from sniffing for the history API
+//        // since it's not supported in packaged apps.
+//        $provide.decorator('$window', function($delegate) {
+//            $delegate.history = null;
+//            Object.defineProperty($delegate, 'history', {get: function() {return null;}});
+//            return $delegate;
+//        });
+//    })
     .config(function($ionicConfigProvider){
         $ionicConfigProvider.backButton.previousTitleText(false).text('');
     })

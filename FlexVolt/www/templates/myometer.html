@@ -21,8 +21,6 @@
         <div style="text-align:center" class="col" 
              ng-repeat="label in pageLogic.settings.labels | limitTo : pageLogic.settings.nChannels" 
              ng-click="showLabelPopup($index)">
-<!--             editable-text="label.name" 
-             onaftersave="updateLabels()">-->
             {{label.name}}
         </div>
         <div class="col col-10px"></div>
