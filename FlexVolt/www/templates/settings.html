@@ -17,14 +17,14 @@
             </label>
         </p>
         <h3 align="center">Sampling Depth</h3>
-        <ion-toggle ng-model="bitDepth10" ng-change="onChange()" ng-checked="bitDepth10">
-            <span ng-if="bitDepth10"> High Res - 10 bits </span>
-            <span ng-if="!bitDepth10"> Low Res - 8 bits </span>
+        <ion-toggle ng-model="settings.bitDepth10" ng-change="onChange()" ng-checked="settings.bitDepth10">
+            <span ng-if="settings.bitDepth10"> High Res - 10 bits </span>
+            <span ng-if="!settings.bitDepth10"> Low Res - 8 bits </span>
         </ion-toggle>
         <h3 align="center">Raw/Filtered Data</h3>
-        <ion-toggle ng-model="smoothFilterFlag" ng-change="onChange()" ng-checked="smoothFilterFlag">
-            <span ng-if="smoothFilterFlag"> Send smoothed data </span>
-            <span ng-if="!smoothFilterFlag"> Send raw data </span>
+        <ion-toggle ng-model="settings.smoothFilterFlag" ng-change="onChange()" ng-checked="settings.smoothFilterFlag">
+            <span ng-if="settings.smoothFilterFlag"> Send smoothed data </span>
+            <span ng-if="!settings.smoothFilterFlag"> Send raw data </span>
         </ion-toggle>
         <h3 align="center">Smoothing Level: {{settings.smoothFilterVal}}</h3>
         <p>&nbsp&nbsp&nbsp
