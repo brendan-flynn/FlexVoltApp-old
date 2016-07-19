@@ -25,8 +25,7 @@ angular.module('flexvolt.dsp', [])
         
         var recordData = false;
         var recordedData = [];
-        var recordedDataStorage = {};
-        window.rd = recordedDataStorage;
+        var recordedDataFile = undefined;
         var nChannels = 1; // default
 //        var filter, filterSettings, dftSettings, dftFlag = false;
         var metricsArr, metricsFlag = false, metricsNPoints = 500;
@@ -202,6 +201,9 @@ angular.module('flexvolt.dsp', [])
                 for (var i = 0; i < nChannels; i++){
                     recordedData[i].data = recordedData[i].data.concat(parsedData[i]);
                 }
+                if (recordedData[0].data.length > 5000) {
+                  saveRecordedData();
+                }
             }
             
             // Make this faster by only processing nChannels
@@ -231,7 +233,8 @@ angular.module('flexvolt.dsp', [])
             return parsedData;
         };
         
-        api.startRecording = function(){
+        function initRecordedData() {
+            // clear recorded data
             recordedData = [];
             for (var i = 0; i < nChannels; i++){
                 recordedData[i] = {
@@ -239,25 +242,42 @@ angular.module('flexvolt.dsp', [])
                   data: []
                 };
             }
+        }
+        
+        function clearRecordedData() {
+          // clear recorded data
+            recordedData = [];
+            for (var i = 0; i < nChannels; i++){
+                recordedData[i] = {
+                  data: []
+                };
+            }
+        }
+        
+        function saveRecordedData(){
+            var tmp = recordedData.slice(0);
+            clearRecordedData();
+            file.writeFile(recordedDataFile, tmp);
+        };
+        
+        api.startRecording = function(){
+            initRecordedData();
             recordData = true;
+            var d = new Date();
+            recordedDataFile = 'flexvolt-recorded-data--'+d.getFullYear()+'-'
+                +(d.getMonth()+1)+'-'+d.getDate()+'--'
+                +d.getHours()+'-'+d.getMinutes()+'-'
+                +d.getSeconds();
+            file.openFile(recordedDataFile);
         };
         
         api.stopRecording = function(){
             recordData = false;
-            var d = new Date();
-            var name = 'flexvolt-recorded-data--'+d.getFullYear()+'-'
-                +(d.getMonth()+1)+'-'+d.getDate()+'--'
-                +d.getHours()+'-'+d.getMinutes()+'-'
-                +d.getSeconds();
-            //var setObj = {};
-            //setObj[name] = recordedData;
-            var t1 = Date.now();
-            //storage.set(setObj);
-            //recordedDataStorage[name] = recordedData;
-            file.writeFile(name,recordedData);
-            var t2 = Date.now();
-            recordedData = [];
-            console.log('StorageTime: '+(t2-t1));
+            // write and close
+            file.writeFile(recordedDataFile, recordedData);
+            file.closeFile();
+            recordedData = undefined;
+            recordedDataFile = undefined;
         };
 
         api.getMetrics = function(){

@@ -289,11 +289,13 @@ angular.module('flexvolt.services', [])
        
         var nPts = dataObj[0].data.length;
 
-        var header = '';
-        for (var i = 0; i < dataObj.length; i++) {
-            header += 'Channel'+(dataObj[i].channel+1)+',';
+        if (typeof(dataObj[0].channel) !== 'undefined') {
+          var header = '';
+          for (var i = 0; i < dataObj.length; i++) {
+              header += 'Channel'+(dataObj[i].channel+1)+',';
+          }
+          str += header + '\r\n';
         }
-        str += header + '\r\n';
         
         for (var jPts = 0; jPts < nPts; jPts++) {
             var line = '';
@@ -336,16 +338,11 @@ angular.module('flexvolt.services', [])
           return deferred.promise;
         };
         
-        var writeFile = function(filename, data){
+        var openFile = function(filename){
           // handle extensions
           if (filename.indexOf('.') < 0){
             filename = filename + '.txt';
           }
-          
-          window.d = data;
-          // convert to csv, then text blob
-          data = convertToCSV(data);
-          data = new Blob([data]);
           
           chrome.fileSystem.getWritableEntry(file.currentEntry, function(entry){
             if (chrome.runtime.lastError) {
@@ -353,10 +350,7 @@ angular.module('flexvolt.services', [])
             }
             entry.getFile(filename, {create: true}, function(newEntry){
               newEntry.createWriter(function(writer){
-//                writer.onwrite = function(){
-//                  writer.onwrite = null;
-//                  writer.truncate(Writer.position);
-//                };
+
                 writer.onwriteend = function(){
                   console.log('Write completed.');
                 };
@@ -365,25 +359,50 @@ angular.module('flexvolt.services', [])
                   console.log('Error writing file.');
                 };
                 
-                writer.write(data,{type: 'text/plain'});
+                file.writer = writer;
               }, errorHandler);
             }, errorHandler);
           });
         };
         
-        file.writeFile = function(filename, data){
+        var writeFile = function(data){
+          // convert to csv, then text blob
+          data = convertToCSV(data);
+          data = new Blob([data]);
+          
+          file.writer.write(data,{type: 'text/plain'});
+        };
+        
+        file.openFile = function(filename){
           if (!file.currentEntry || !file.currentEntry.isDirectory){
             file.getDirectory().
               then(function(){
                 console.log('file.getDirectory.then, now writing');  
-                writeFile(filename, data);
+                openFile(filename);
               });
           } else {
             console.log('already have a directory - writing');
-            writeFile(filename, data);
+            openFile(filename);
           }
-          
-        }
+        };
+        
+        file.closeFile = function(){
+          file.writer = undefined;
+        };
+        
+        file.writeFile = function(filename, data){
+          if (!file.writer){
+            file.openFile().
+              then(function(){
+                console.log('file.openFile.then, now writing');  
+                writeFile(data);
+              });
+          } else {
+            console.log('already have a directory - writing');
+            writeFile(data);
+          }
+        };
+        
         window.fs = chrome.fileSystem;
     } else {
         file.getDirectory = function(){
