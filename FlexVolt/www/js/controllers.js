@@ -1120,23 +1120,7 @@
         $scope.app = {
           version: appLogic.dm.version
         };
-        
-//        $scope.createFile = function(){
-//            chrome.fileSystem.chooseEntry({
-//                    type: 'saveFile', 
-//                    suggestedName: 'myfile',
-//                    accepts: [{extensions: ['csv']}]
-//                }, 
-//                function(writableFileEntry) {
-//                    writableFileEntry.createWriter(function(writer) {
-//                        writer.onwriteend = function(e) {
-//                            console.log('Save complete!');
-//                        };
-//                        writer.write(new Blob(['test text to write'],{type: 'text/plain'})); 
-//                }, function(e){console.log('ERROR: in file writer: '+angular.toJson(e));});
-//            });  
-//        };
-        
+              
     }])
     .controller('IntroCtrl', ['$scope', function($scope){
 //        $scope.emailTaskFeedback = 'mailto:software@flexvoltbiosensor.com?subject=inApp%20Task%20Feedback';
