@@ -68,7 +68,8 @@ angular.module('flexvolt.flexvolt', [])
             model: undefined,
             state: undefined,
             data: undefined,
-            dataOnRequested: undefined
+            dataOnRequested: undefined,
+            flexvoltName: undefined
         },
         debugging: {
             communicationsLog: ''
@@ -372,6 +373,7 @@ angular.module('flexvolt.flexvolt', [])
 //                connectionResetHandler(tryPorts);
 //            } else if (api.connection.state === 'connecting'){
                 api.flexvoltPortList.push(api.currentPort);
+                api.connection.flexvoltName = api.currentPort;
                 api.connection.state = 'connected';
                 connectionTestInterval = $interval(checkConnection,1000);
                 console.log('Connected to ' + api.currentPort);
