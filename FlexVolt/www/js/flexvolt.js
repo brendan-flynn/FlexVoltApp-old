@@ -33,7 +33,7 @@ angular.module('flexvolt.flexvolt', [])
   function($timeout, $interval, bluetoothPlugin, hardwareLogic) {
     var connectionTestInterval;
     var receivedData;
-    var defaultWait = 500;
+    var defaultWait = 1000;
     var modelList = [];
     var dots = '';
     modelList[0] = 'USB 2 Channel';
@@ -479,7 +479,7 @@ angular.module('flexvolt.flexvolt', [])
             console.log('REG='+msg+'bytes/ ='+REG.BYTES_PER_ELEMENT);
 
             writeBuffer(REG);
-            waitForInput(null,4*defaultWait,121,updateSettings3);  
+            waitForInput(null,10*defaultWait,121,updateSettings3);  
         }
         function updateSettings3(){
             console.log('Update Settings 3');
