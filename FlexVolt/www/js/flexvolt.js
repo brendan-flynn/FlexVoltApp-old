@@ -305,18 +305,18 @@ angular.module('flexvolt.flexvolt', [])
             });
             
             // make tmp portlist 
-            api.tryList = api.portList.slice(0);
+            api.tryList = api.portList.slice(0); // clean copy
             
             // move preferred ports to the front
             if (api.preferredPortList.length > 0){
                 console.log('Preferred port list:'+JSON.stringify(api.preferredPortList));
                 for (var i = 0; i < api.preferredPortList.length; i++){
                     api.tryList.splice(api.tryList.indexOf(api.preferredPortList[i]),1);
-                    api.tryList.splice(api.tryList.length,0,api.preferredPortList[i]);
+                    api.tryList.push(api.tryList.length,0,api.preferredPortList[i]);
                 }
                 console.log('Updated tryList: '+JSON.stringify(api.tryList));
-                api.portList = api.tryList;
-                api.portList.reverse();
+                api.portList = api.tryList.slice(0); // clean copy
+                console.log('Updated portList: '+JSON.stringify(api.portList));
             } else {console.log('No preferred ports found');}
             
             // pass it to a function that will try each port
