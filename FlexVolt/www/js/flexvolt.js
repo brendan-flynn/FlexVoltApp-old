@@ -123,12 +123,17 @@ angular.module('flexvolt.flexvolt', [])
             api.settings.plugTestDelay = 0;
         }
 
-//        function cancelTimeout() {
-//            if ( pollingTimeout ) {
-//                $timeout.cancel(pollingTimeout);
-//                pollingTimeout = undefined;
-//            }
-//        }
+        function cancelTimeout() {
+            if ( pollingTimeout ) {
+                $timeout.cancel(pollingTimeout);
+                pollingTimeout = undefined;
+            }
+        }
+        
+        function cancelConnectAttempt() {
+          cancelTimeout();
+          clearConnection();
+        }
 
         api.registerNewDataCallback = function ( cb ) {
             newDataCallback = cb;
@@ -186,7 +191,7 @@ angular.module('flexvolt.flexvolt', [])
             }
             
             // wait for data to come back
-            $timeout(function(){
+            pollingTimeout = $timeout(function(){
                 while(dIn.length > 0){
                     //console.log('dIn.length = '+dIn.length);
                     var b = dIn.slice(0,1);
@@ -236,7 +241,12 @@ angular.module('flexvolt.flexvolt', [])
                         $timeout(cb,250);
                     } else {
                         api.connection.state ='begin';
-                        console.log('DEBUG: Cleared Connection');
+                        bluetoothPlugin.clear(function() {
+                          console.log('DEBUG: Cleared Connection');
+                        }, function() {
+                          console.log('Error clearing bluetooth');
+                        });
+                        
                     }
                 },
                 function () { console.log('Error disconnecting.'); 
@@ -355,7 +365,7 @@ angular.module('flexvolt.flexvolt', [])
             bluetoothPlugin.clear(handshake1, simpleLog);
         }
         function handshake1() {
-            $timeout(function(){
+            pollingTimeout = $timeout(function(){
                         waitForInput('A',defaultWait,97,handshake2);
                     },2000);   
         }
@@ -404,7 +414,7 @@ angular.module('flexvolt.flexvolt', [])
                 dIn = dIn.slice(4);
                 updateSettings();
             } else {
-                $timeout(parseVersion);
+                pollingTimeout = $timeout(parseVersion);
             }
         }
         function updateSettings(){
@@ -731,9 +741,13 @@ angular.module('flexvolt.flexvolt', [])
         api.resetConnection = resetConnection; // pass true to reconnect
         api.disconnect = clearConnection; // pass false to sit and do nothing
         api.manualConnect = manualConnect;
+        api.cancelConnection = cancelConnectAttempt;
     });
     return {
         api : api,
+        getConnectingStatus: function(){
+          return api.connection.state === 'searching' || api.connection.state === 'connecting';
+        },
         getConnectionStatus: function(){
             return api.connection.state === 'connected' || api.connection.state === 'polling' || api.connection.state === 'updating settings';
         },

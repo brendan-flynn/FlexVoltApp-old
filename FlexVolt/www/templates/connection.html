@@ -20,8 +20,11 @@
                 </div>
             </div>
         </div>
-        <div ng-if="!flexvolt.getConnectionStatus()">
+        <div ng-if="!flexvolt.getConnectionStatus() && !flexvolt.getConnectingStatus()">
             <button ng-click="flexvolt.api.resetConnection()">Try to connect</button>
+        </div>
+        <div ng-if="flexvolt.getConnectingStatus()">
+            <button ng-click="flexvolt.api.cancelConnection()">Cancel Connect Attempt</button>
         </div>
 
         <div ng-if="!mobile">
