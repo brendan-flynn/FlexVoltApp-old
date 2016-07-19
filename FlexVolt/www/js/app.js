@@ -21,7 +21,7 @@
         'flexvolt.dsp'
     ])
     
-    .run(function($ionicPlatform) {
+    .run(function($ionicPlatform, appLogic) {
       //editableOptions.theme = 'default'; // bootstrap3 theme. Can be also 'bs2', 'bs3', 'default'
 
       $ionicPlatform.ready(function() {
@@ -79,6 +79,13 @@
         console.log('screen:  W:'+screen.width+'H:'+screen.height);
 
 
+        // get version
+        if (window.cordova) {
+          // get cordova version
+          appLogic.dm.version = 'unavailable'; // TODO - fix this!
+        } else if (window.chrome) {
+          appLogic.dm.version = chrome.runtime.getManifest().version;
+        }
       });
     })
     //.config(function($ionicConfigProvider){

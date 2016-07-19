@@ -909,8 +909,7 @@
             name : '',
             email : '',
             comment : ''
-        };
-        
+        };  
 
         $scope.updatePorts = function(){
             flexvolt.api.updatePorts();
@@ -1100,8 +1099,8 @@
     //    
     }])
     .controller('SettingsCtrl', 
-    ['$scope','$state','flexvolt','hardwareLogic','file',
-    function($scope, $state, flexvolt, hardwareLogic, file) {
+    ['$scope','$state','flexvolt','hardwareLogic','file','appLogic',
+    function($scope, $state, flexvolt, hardwareLogic, file, appLogic) {
         var currentUrl = $state.current.url;
         console.log('currentUrl = '+currentUrl);
         
@@ -1116,6 +1115,10 @@
             console.log('settings now: '+angular.toJson(hardwareLogic.settings));
             hardwareLogic.updateSettings();
             flexvolt.api.updateSettings();
+        };
+        
+        $scope.app = {
+          version: appLogic.dm.version
         };
         
 //        $scope.createFile = function(){
